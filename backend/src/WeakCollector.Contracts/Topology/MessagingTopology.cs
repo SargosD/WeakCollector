@@ -1,4 +1,4 @@
-namespace WeakCollector.Contracts;
+namespace WeakCollector.Contracts.Topology;
 
 public static class MessagingTopology
 {

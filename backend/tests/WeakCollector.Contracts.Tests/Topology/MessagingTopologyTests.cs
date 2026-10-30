@@ -1,6 +1,6 @@
-using WeakCollector.Contracts;
+using WeakCollector.Contracts.Topology;
 
-namespace WeakCollector.Contracts.Tests;
+namespace WeakCollector.Contracts.Tests.Topology;
 
 public class MessagingTopologyTests
 {
