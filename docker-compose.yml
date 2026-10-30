@@ -57,6 +57,14 @@ services:
     build:
       context: ./backend
       dockerfile: src/WeakCollector.Ingestor/Dockerfile
+    environment:
+      WeakApi__BaseUrl: http://weak-api:8080
+      WeakApi__ApiKey: ${WEAKAPI_KEY:-supersecret}
+      WeakApi__PollIntervalSeconds: ${POLL_INTERVAL_SECONDS:-10}
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Port: 5672
+      RabbitMq__User: ${RABBITMQ_USER:-weakcollector}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:-weakcollector}
     depends_on:
       weak-api:
         condition: service_healthy
