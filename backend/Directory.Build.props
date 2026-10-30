@@ -8,14 +8,10 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
     <RootNamespace>$(MSBuildProjectName)</RootNamespace>
-    <Authors>David Sarhsian</Authors>
-    <Product>WeakCollector</Product>
   </PropertyGroup>
 
   <ItemGroup>

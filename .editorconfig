@@ -57,7 +57,15 @@ csharp_indent_switch_labels = true
 csharp_space_after_cast = false
 csharp_preserve_single_line_statements = false
 
-# Naming: private fields are _camelCase
+# Naming: private static readonly fields are PascalCase, other private fields are _camelCase
+dotnet_naming_rule.private_static_readonly_pascal.symbols = private_static_readonly_fields
+dotnet_naming_rule.private_static_readonly_pascal.style = pascal_case
+dotnet_naming_rule.private_static_readonly_pascal.severity = warning
+dotnet_naming_symbols.private_static_readonly_fields.applicable_kinds = field
+dotnet_naming_symbols.private_static_readonly_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_static_readonly_fields.required_modifiers = static, readonly
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
 dotnet_naming_rule.private_fields_underscore.symbols = private_fields
 dotnet_naming_rule.private_fields_underscore.style = underscore_camel
 dotnet_naming_rule.private_fields_underscore.severity = warning
@@ -67,6 +75,8 @@ dotnet_naming_style.underscore_camel.capitalization = camel_case
 dotnet_naming_style.underscore_camel.required_prefix = _
 
 # StyleCop adjustments
+# SA0001: XML doc generation is off because the code carries no doc comments.
+dotnet_diagnostic.SA0001.severity = none
 # SA1101: prefix local calls with this. Conflicts with the no-qualification rules above.
 dotnet_diagnostic.SA1101.severity = none
 # SA1309: field names must not begin with underscore. Conflicts with the naming rule above.
