@@ -1,0 +1,16 @@
+# Normalize line endings to LF in the repository and on checkout,
+# so dotnet format and StyleCop agree on every machine.
+* text=auto eol=lf
+
+# Windows scripts keep CRLF
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.ico binary
+*.dll binary
+*.pdb binary
+*.exe binary
