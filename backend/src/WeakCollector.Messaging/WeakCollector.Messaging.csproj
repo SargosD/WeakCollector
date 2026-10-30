@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+    <PackageReference Include="RabbitMQ.Client" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WeakCollector.Contracts\WeakCollector.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
