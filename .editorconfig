@@ -91,8 +91,9 @@ dotnet_diagnostic.SA1601.severity = none
 dotnet_diagnostic.SA1602.severity = none
 # SA1413: trailing comma in multi-line initializers. Enforced as warning.
 dotnet_diagnostic.SA1413.severity = warning
-# CA1848: use LoggerMessage delegates. Serilog structured logging is enough here.
+# CA1848 and CA1873: use LoggerMessage delegates. Serilog structured logging is enough here.
 dotnet_diagnostic.CA1848.severity = none
+dotnet_diagnostic.CA1873.severity = none
 
 [**/tests/**/*.cs]
 # Tests do not need XML docs or the file-name-matches-type rule for fixture files.

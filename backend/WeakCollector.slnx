@@ -9,5 +9,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/WeakCollector.Contracts.Tests/WeakCollector.Contracts.Tests.csproj" />
+    <Project Path="tests/WeakCollector.Ingestor.Tests/WeakCollector.Ingestor.Tests.csproj" />
   </Folder>
 </Solution>
