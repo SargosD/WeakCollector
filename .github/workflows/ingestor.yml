@@ -1,0 +1,59 @@
+name: ingestor
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/src/WeakCollector.Ingestor/**"
+      - "backend/src/WeakCollector.Contracts/**"
+      - "backend/src/WeakCollector.Messaging/**"
+      - "backend/tests/WeakCollector.Ingestor.Tests/**"
+      - "backend/tests/Directory.Build.props"
+      - "backend/Directory.*.props"
+      - "backend/global.json"
+      - "backend/nuget.config"
+      - "backend/stylecop.json"
+      - ".editorconfig"
+      - ".github/workflows/ingestor.yml"
+  pull_request:
+    paths:
+      - "backend/src/WeakCollector.Ingestor/**"
+      - "backend/src/WeakCollector.Contracts/**"
+      - "backend/src/WeakCollector.Messaging/**"
+      - "backend/tests/WeakCollector.Ingestor.Tests/**"
+      - "backend/tests/Directory.Build.props"
+      - "backend/Directory.*.props"
+      - "backend/global.json"
+      - "backend/nuget.config"
+      - "backend/stylecop.json"
+      - ".editorconfig"
+      - ".github/workflows/ingestor.yml"
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+
+      - name: Restore
+        run: dotnet restore tests/WeakCollector.Ingestor.Tests/WeakCollector.Ingestor.Tests.csproj
+
+      - name: Lint
+        run: dotnet format tests/WeakCollector.Ingestor.Tests/WeakCollector.Ingestor.Tests.csproj --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build tests/WeakCollector.Ingestor.Tests/WeakCollector.Ingestor.Tests.csproj --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --project tests/WeakCollector.Ingestor.Tests/WeakCollector.Ingestor.Tests.csproj --configuration Release --no-build
+
+      - name: Docker build
+        run: docker build --file src/WeakCollector.Ingestor/Dockerfile --tag weakcollector-ingestor:${{ github.sha }} .
