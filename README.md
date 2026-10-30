@@ -17,20 +17,52 @@ It polls the API, pushes every reading through RabbitMQ, stores it in PostgreSQL
 
 ## Run it
 
-Coming with the compose step. The target is one command:
+Requires Docker Desktop.
 
 ```
 docker compose up --build
 ```
 
+| What | URL |
+| --- | --- |
+| Dashboard | http://localhost:3000 |
+| Gateway health | http://localhost:5000/health |
+| Notifier health | http://localhost:5001/health |
+| RabbitMQ management | http://localhost:15672 (weakcollector / weakcollector) |
+| WeakApp API | http://localhost:8080/meters with header `X-Api-Key: supersecret` |
+
+Ports and credentials come from `.env`. Copy `.env.example` to `.env` to change them. Without a `.env` the defaults above apply.
+
 ## Develop
 
-Requires the .NET 10 SDK, Node 24, and Docker Desktop.
+Requires the .NET 10 SDK and Node 24.
 
 ```
+cd backend
 dotnet build
 dotnet test
 dotnet format --verify-no-changes
+```
+
+```
+cd frontend
+npm install
+npm run dev
+npm run lint
+npm test
+```
+
+Tests run on Microsoft.Testing.Platform with xunit v3, which `backend/global.json` turns on.
+
+## Layout
+
+```
+backend/
+  WeakCollector.slnx
+  src/        one project per service plus WeakCollector.Contracts
+  tests/      one xunit project per service
+frontend/     React dashboard
+weak-api/     the provided unstable API
 ```
 
 Every change goes through a pull request into `main` and is squash-merged. Branch names follow `feature/<topic>`.
