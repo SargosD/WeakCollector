@@ -1,2 +1,8 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WeakCollector.Contracts/WeakCollector.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WeakCollector.Contracts.Tests/WeakCollector.Contracts.Tests.csproj" />
+  </Folder>
 </Solution>
