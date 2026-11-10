@@ -1,14 +1,14 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/WeakCollector.Common/WeakCollector.Common.csproj" />
-    <Project Path="src/WeakCollector.Gateway/WeakCollector.Gateway.csproj" />
-    <Project Path="src/WeakCollector.Ingestor/WeakCollector.Ingestor.csproj" />
-    <Project Path="src/WeakCollector.Messaging/WeakCollector.Messaging.csproj" />
-    <Project Path="src/WeakCollector.Notifier/WeakCollector.Notifier.csproj" />
-    <Project Path="src/WeakCollector.Processor/WeakCollector.Processor.csproj" />
+    <Project Path="WeakCollector.Common/WeakCollector.Common.csproj" />
+    <Project Path="WeakCollector.Gateway/WeakCollector.Gateway.csproj" />
+    <Project Path="WeakCollector.Ingestor/WeakCollector.Ingestor.csproj" />
+    <Project Path="WeakCollector.Messaging/WeakCollector.Messaging.csproj" />
+    <Project Path="WeakCollector.Notifier/WeakCollector.Notifier.csproj" />
+    <Project Path="WeakCollector.Processor/WeakCollector.Processor.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/WeakCollector.Ingestor.Tests/WeakCollector.Ingestor.Tests.csproj" />
-    <Project Path="tests/WeakCollector.Messaging.Tests/WeakCollector.Messaging.Tests.csproj" />
+    <Project Path="WeakCollector.Ingestor.Tests/WeakCollector.Ingestor.Tests.csproj" />
+    <Project Path="WeakCollector.Messaging.Tests/WeakCollector.Messaging.Tests.csproj" />
   </Folder>
 </Solution>

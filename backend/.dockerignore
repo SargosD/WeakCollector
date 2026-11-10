@@ -9,7 +9,7 @@
 .git/
 .github/
 docs/
-tests/
+*.Tests/
 .env
 .env.*
 !.env.example

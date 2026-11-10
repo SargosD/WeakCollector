@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\WeakCollector.Messaging\WeakCollector.Messaging.csproj" />
+  </ItemGroup>
+
+</Project>
