@@ -1,7 +1,10 @@
+using System.Net;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using Polly;
+using Polly.Timeout;
 using WeakCollector.Common.Configuration;
+using WeakCollector.Ingestor.Configuration;
 
 namespace WeakCollector.Ingestor.WeakApi;
 
@@ -28,7 +31,7 @@ internal static class WeakApiServiceCollectionExtensions
                     Delay = TimeSpan.FromMilliseconds(options.RetryDelayMilliseconds),
                     BackoffType = DelayBackoffType.Exponential,
                     UseJitter = true,
-                    ShouldHandle = args => ValueTask.FromResult(WeakApiFailures.IsTransient(args.Outcome)),
+                    ShouldHandle = args => ValueTask.FromResult(IsTransient(args.Outcome)),
                 });
 
                 builder.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
@@ -37,12 +40,28 @@ internal static class WeakApiServiceCollectionExtensions
                     MinimumThroughput = 10,
                     SamplingDuration = TimeSpan.FromSeconds(60),
                     BreakDuration = TimeSpan.FromSeconds(30),
-                    ShouldHandle = args => ValueTask.FromResult(WeakApiFailures.IsTransient(args.Outcome)),
+                    ShouldHandle = args => ValueTask.FromResult(IsTransient(args.Outcome)),
                 });
 
                 builder.AddTimeout(TimeSpan.FromSeconds(options.AttemptTimeoutSeconds));
             });
 
         return httpClientBuilder;
+    }
+
+    private static bool IsTransient(Outcome<HttpResponseMessage> outcome)
+    {
+        if (outcome.Exception is not null)
+        {
+            return outcome.Exception is HttpRequestException or TimeoutRejectedException or IOException;
+        }
+
+        if (outcome.Result is null)
+        {
+            return false;
+        }
+
+        var status = outcome.Result.StatusCode;
+        return (int)status >= 500 || status == HttpStatusCode.RequestTimeout;
     }
 }

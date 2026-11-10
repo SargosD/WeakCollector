@@ -6,7 +6,6 @@ on:
     paths:
       - "backend/src/WeakCollector.Ingestor/**"
       - "backend/src/WeakCollector.Common/**"
-      - "backend/src/WeakCollector.Contracts/**"
       - "backend/src/WeakCollector.Messaging/**"
       - "backend/tests/WeakCollector.Ingestor.Tests/**"
       - "backend/tests/Directory.Build.props"
@@ -20,7 +19,6 @@ on:
     paths:
       - "backend/src/WeakCollector.Ingestor/**"
       - "backend/src/WeakCollector.Common/**"
-      - "backend/src/WeakCollector.Contracts/**"
       - "backend/src/WeakCollector.Messaging/**"
       - "backend/tests/WeakCollector.Ingestor.Tests/**"
       - "backend/tests/Directory.Build.props"

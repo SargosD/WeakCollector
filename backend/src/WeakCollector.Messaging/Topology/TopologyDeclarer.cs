@@ -1,5 +1,4 @@
 using RabbitMQ.Client;
-using WeakCollector.Contracts.Topology;
 
 namespace WeakCollector.Messaging.Topology;
 
@@ -8,46 +7,46 @@ public static class TopologyDeclarer
     public static async Task DeclareAsync(IChannel channel, CancellationToken cancellationToken)
     {
         await channel.ExchangeDeclareAsync(
-            MessagingTopology.RawExchange,
+            TopologyNames.RawExchange,
             ExchangeType.Topic,
             durable: true,
             autoDelete: false,
             cancellationToken: cancellationToken);
 
         await channel.ExchangeDeclareAsync(
-            MessagingTopology.StoredExchange,
+            TopologyNames.ProcessedExchange,
             ExchangeType.Topic,
             durable: true,
             autoDelete: false,
             cancellationToken: cancellationToken);
 
         await channel.ExchangeDeclareAsync(
-            MessagingTopology.DeadLetterExchange,
+            TopologyNames.DeadLetterExchange,
             ExchangeType.Topic,
             durable: true,
             autoDelete: false,
             cancellationToken: cancellationToken);
 
         await channel.QueueDeclareAsync(
-            MessagingTopology.DeadLetterQueue,
+            TopologyNames.ProcessorDeadLetterQueue,
             durable: true,
             exclusive: false,
             autoDelete: false,
             cancellationToken: cancellationToken);
 
         await channel.QueueBindAsync(
-            MessagingTopology.DeadLetterQueue,
-            MessagingTopology.DeadLetterExchange,
-            "#",
+            TopologyNames.ProcessorDeadLetterQueue,
+            TopologyNames.DeadLetterExchange,
+            TopologyNames.TelemetryReceivedKey,
             cancellationToken: cancellationToken);
 
         var processQueueArguments = new Dictionary<string, object?>
         {
-            ["x-dead-letter-exchange"] = MessagingTopology.DeadLetterExchange,
+            ["x-dead-letter-exchange"] = TopologyNames.DeadLetterExchange,
         };
 
         await channel.QueueDeclareAsync(
-            MessagingTopology.ProcessQueue,
+            TopologyNames.ProcessorQueue,
             durable: true,
             exclusive: false,
             autoDelete: false,
@@ -55,9 +54,9 @@ public static class TopologyDeclarer
             cancellationToken: cancellationToken);
 
         await channel.QueueBindAsync(
-            MessagingTopology.ProcessQueue,
-            MessagingTopology.RawExchange,
-            "#",
+            TopologyNames.ProcessorQueue,
+            TopologyNames.RawExchange,
+            TopologyNames.TelemetryReceivedKey,
             cancellationToken: cancellationToken);
     }
 }

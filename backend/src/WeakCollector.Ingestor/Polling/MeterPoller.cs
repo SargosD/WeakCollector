@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Options;
-using WeakCollector.Ingestor.WeakApi;
+using WeakCollector.Ingestor.Configuration;
 
 namespace WeakCollector.Ingestor.Polling;
 
@@ -19,7 +19,7 @@ internal sealed class MeterPoller(
         {
             try
             {
-                await runner.RunOnceAsync(stoppingToken);
+                await runner.RunAsync(stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {

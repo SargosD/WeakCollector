@@ -5,7 +5,7 @@ using WeakCollector.Messaging.Configuration;
 using WeakCollector.Messaging.Connections;
 using WeakCollector.Messaging.Publishing;
 
-namespace WeakCollector.Messaging.DependencyInjection;
+namespace WeakCollector.Messaging;
 
 public static class MessagingServiceCollectionExtensions
 {

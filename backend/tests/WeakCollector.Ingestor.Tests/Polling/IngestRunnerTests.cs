@@ -1,32 +1,25 @@
 using System.Net;
-using WeakCollector.Contracts.Messages;
-using WeakCollector.Contracts.Topology;
 using WeakCollector.Ingestor.Tests.Support;
+using WeakCollector.Messaging.Messages;
+using WeakCollector.Messaging.Topology;
 
 namespace WeakCollector.Ingestor.Tests.Polling;
 
 public class IngestRunnerTests
 {
     [Fact]
-    public async Task Publishes_batch_and_successful_attempt()
+    public async Task Publishes_batch_to_raw_exchange()
     {
         var handler = new ScriptedHandler().Respond(HttpStatusCode.OK, SampleMeters.ThreeTypes);
         var publisher = new FakePublisher();
 
-        var attempt = await IngestorServices.Runner(handler, publisher).RunOnceAsync(CancellationToken.None);
+        var published = await IngestorServices.Runner(handler, publisher).RunAsync(CancellationToken.None);
 
-        attempt.Success.ShouldBeTrue();
-        attempt.StatusCode.ShouldBe(200);
-
-        var batch = publisher.MessagesOf<ReadingsBatch>().ShouldHaveSingleItem();
-        batch.Readings.Count.ShouldBe(3);
-        batch.ObservedAt.ShouldBe(attempt.AttemptedAt);
-
-        publisher.MessagesOf<IngestAttempt>().ShouldHaveSingleItem().ShouldBe(attempt);
+        published.ShouldBeTrue();
+        publisher.MessagesOf<TelemetryBatch>().ShouldHaveSingleItem().Records.Count.ShouldBe(3);
         publisher.Published.Select(p => (p.Exchange, p.RoutingKey)).ShouldBe(
         [
-            (MessagingTopology.RawExchange, MessagingTopology.ReadingsBatchKey),
-            (MessagingTopology.RawExchange, MessagingTopology.IngestAttemptKey),
+            (TopologyNames.RawExchange, TopologyNames.TelemetryReceivedKey),
         ]);
     }
 
@@ -39,31 +32,28 @@ public class IngestRunnerTests
             .Respond(HttpStatusCode.OK, SampleMeters.ThreeTypes);
         var publisher = new FakePublisher();
 
-        var attempt = await IngestorServices.Runner(handler, publisher).RunOnceAsync(CancellationToken.None);
+        var published = await IngestorServices.Runner(handler, publisher).RunAsync(CancellationToken.None);
 
         handler.Calls.ShouldBe(3);
-        attempt.Success.ShouldBeTrue();
-        publisher.MessagesOf<ReadingsBatch>().Count.ShouldBe(1);
+        published.ShouldBeTrue();
+        publisher.MessagesOf<TelemetryBatch>().Count.ShouldBe(1);
     }
 
     [Fact]
-    public async Task Records_failed_attempt_on_rate_limit_without_batch()
+    public async Task Publishes_nothing_on_rate_limit()
     {
         var handler = new ScriptedHandler().Respond(HttpStatusCode.TooManyRequests);
         var publisher = new FakePublisher();
 
-        var attempt = await IngestorServices.Runner(handler, publisher).RunOnceAsync(CancellationToken.None);
+        var published = await IngestorServices.Runner(handler, publisher).RunAsync(CancellationToken.None);
 
         handler.Calls.ShouldBe(1);
-        attempt.Success.ShouldBeFalse();
-        attempt.StatusCode.ShouldBe(429);
-        attempt.Error.ShouldNotBeNullOrEmpty();
-        publisher.MessagesOf<ReadingsBatch>().ShouldBeEmpty();
-        publisher.MessagesOf<IngestAttempt>().ShouldHaveSingleItem();
+        published.ShouldBeFalse();
+        publisher.Published.ShouldBeEmpty();
     }
 
     [Fact]
-    public async Task Records_failed_attempt_when_retries_are_exhausted()
+    public async Task Publishes_nothing_when_retries_are_exhausted()
     {
         var handler = new ScriptedHandler()
             .Respond(HttpStatusCode.InternalServerError)
@@ -72,12 +62,11 @@ public class IngestRunnerTests
             .Respond(HttpStatusCode.InternalServerError);
         var publisher = new FakePublisher();
 
-        var attempt = await IngestorServices.Runner(handler, publisher).RunOnceAsync(CancellationToken.None);
+        var published = await IngestorServices.Runner(handler, publisher).RunAsync(CancellationToken.None);
 
         handler.Calls.ShouldBe(4);
-        attempt.Success.ShouldBeFalse();
-        attempt.StatusCode.ShouldBe(500);
-        publisher.MessagesOf<ReadingsBatch>().ShouldBeEmpty();
+        published.ShouldBeFalse();
+        publisher.Published.ShouldBeEmpty();
     }
 
     [Fact]
@@ -86,9 +75,9 @@ public class IngestRunnerTests
         var handler = new ScriptedHandler().Respond(HttpStatusCode.OK, SampleMeters.WithUnknownType);
         var publisher = new FakePublisher();
 
-        var attempt = await IngestorServices.Runner(handler, publisher).RunOnceAsync(CancellationToken.None);
+        var published = await IngestorServices.Runner(handler, publisher).RunAsync(CancellationToken.None);
 
-        attempt.Success.ShouldBeTrue();
-        publisher.MessagesOf<ReadingsBatch>().ShouldHaveSingleItem().Readings.Count.ShouldBe(1);
+        published.ShouldBeTrue();
+        publisher.MessagesOf<TelemetryBatch>().ShouldHaveSingleItem().Records.Count.ShouldBe(1);
     }
 }

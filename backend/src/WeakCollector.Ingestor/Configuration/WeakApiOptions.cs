@@ -1,4 +1,4 @@
-namespace WeakCollector.Ingestor.WeakApi;
+namespace WeakCollector.Ingestor.Configuration;
 
 public sealed class WeakApiOptions
 {

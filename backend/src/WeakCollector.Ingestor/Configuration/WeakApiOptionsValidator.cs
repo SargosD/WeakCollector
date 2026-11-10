@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace WeakCollector.Ingestor.WeakApi;
+namespace WeakCollector.Ingestor.Configuration;
 
 public sealed class WeakApiOptionsValidator : AbstractValidator<WeakApiOptions>
 {

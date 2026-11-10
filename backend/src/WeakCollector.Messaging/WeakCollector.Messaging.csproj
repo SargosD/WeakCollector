@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WeakCollector.Common\WeakCollector.Common.csproj" />
-    <ProjectReference Include="..\WeakCollector.Contracts\WeakCollector.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

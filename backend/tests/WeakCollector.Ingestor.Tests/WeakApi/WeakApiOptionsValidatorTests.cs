@@ -1,4 +1,4 @@
-using WeakCollector.Ingestor.WeakApi;
+using WeakCollector.Ingestor.Configuration;
 
 namespace WeakCollector.Ingestor.Tests.WeakApi;
 

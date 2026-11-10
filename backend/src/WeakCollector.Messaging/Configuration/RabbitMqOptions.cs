@@ -13,4 +13,6 @@ public sealed class RabbitMqOptions
     public string Password { get; set; } = string.Empty;
 
     public string VirtualHost { get; set; } = "/";
+
+    public int NetworkRecoveryIntervalSeconds { get; set; } = 5;
 }

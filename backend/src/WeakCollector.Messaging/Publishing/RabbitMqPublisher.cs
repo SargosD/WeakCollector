@@ -1,8 +1,8 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using WeakCollector.Contracts.Serialization;
 using WeakCollector.Messaging.Connections;
+using WeakCollector.Messaging.Serialization;
 using WeakCollector.Messaging.Topology;
 
 namespace WeakCollector.Messaging.Publishing;

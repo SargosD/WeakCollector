@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace WeakCollector.Contracts.Serialization;
+namespace WeakCollector.Messaging.Serialization;
 
 public static class MessageJson
 {

@@ -1,20 +1,20 @@
-using WeakCollector.Contracts.Messages;
-using WeakCollector.Ingestor.WeakApi;
+using WeakCollector.Ingestor.Models;
+using WeakCollector.Messaging.Messages;
 
 namespace WeakCollector.Ingestor.Polling;
 
-internal static class ReadingMapper
+internal static class TelemetryMapper
 {
-    public static MappedBatch ToBatch(IReadOnlyList<MeterDto> meters, DateTimeOffset observedAt)
+    public static (TelemetryBatch Batch, IReadOnlyList<string> UnknownTypes) ToBatch(IReadOnlyList<MeterDto> meters, DateTimeOffset observedAt)
     {
-        var readings = new List<Reading>(meters.Count);
+        var records = new List<TelemetryRecord>(meters.Count);
         var unknownTypes = new List<string>();
 
         foreach (var meter in meters)
         {
             if (TryParseType(meter.Type, out var type))
             {
-                readings.Add(new Reading(type, meter.Name, meter.Payload));
+                records.Add(new TelemetryRecord(type, meter.Name, meter.Payload));
             }
             else
             {
@@ -22,7 +22,7 @@ internal static class ReadingMapper
             }
         }
 
-        return new MappedBatch(new ReadingsBatch(Guid.NewGuid(), observedAt, readings), unknownTypes);
+        return (new TelemetryBatch(Guid.NewGuid(), observedAt, records), unknownTypes);
     }
 
     private static bool TryParseType(string value, out MeterType type)

@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
-using WeakCollector.Contracts.Serialization;
+using WeakCollector.Ingestor.Models;
+using WeakCollector.Messaging.Serialization;
 
 namespace WeakCollector.Ingestor.WeakApi;
 

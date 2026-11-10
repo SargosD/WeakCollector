@@ -5,6 +5,7 @@ using WeakCollector.Messaging.Configuration;
 
 namespace WeakCollector.Messaging.Connections;
 
+
 public sealed class RabbitMqConnection(IOptions<RabbitMqOptions> options, ILogger<RabbitMqConnection> logger) : IAsyncDisposable
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
@@ -12,7 +13,7 @@ public sealed class RabbitMqConnection(IOptions<RabbitMqOptions> options, ILogge
 
     public async Task<IConnection> GetConnectionAsync(CancellationToken cancellationToken)
     {
-        if (_connection is { IsOpen: true })
+        if (_connection is not null)
         {
             return _connection;
         }
@@ -20,31 +21,27 @@ public sealed class RabbitMqConnection(IOptions<RabbitMqOptions> options, ILogge
         await _gate.WaitAsync(cancellationToken);
         try
         {
-            if (_connection is { IsOpen: true })
+            if (_connection is not null)
             {
                 return _connection;
             }
 
-            if (_connection is not null)
-            {
-                await _connection.DisposeAsync();
-            }
-
             var settings = options.Value;
-            var host = settings.Host;
-            var port = settings.Port;
             var factory = new ConnectionFactory
             {
-                HostName = host,
-                Port = port,
+                HostName = settings.Host,
+                Port = settings.Port,
                 UserName = settings.User,
                 Password = settings.Password,
                 VirtualHost = settings.VirtualHost,
+                ClientProvidedName = AppDomain.CurrentDomain.FriendlyName,
                 AutomaticRecoveryEnabled = true,
+                TopologyRecoveryEnabled = true,
+                NetworkRecoveryInterval = TimeSpan.FromSeconds(settings.NetworkRecoveryIntervalSeconds),
             };
 
             _connection = await factory.CreateConnectionAsync(cancellationToken);
-            logger.LogInformation("Connected to RabbitMQ at {Host}:{Port}", host, port);
+            logger.LogInformation("Connected to RabbitMQ at {Host}:{Port}", settings.Host, settings.Port);
             return _connection;
         }
         finally

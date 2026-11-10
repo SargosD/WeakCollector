@@ -11,5 +11,6 @@ public sealed class RabbitMqOptionsValidator : AbstractValidator<RabbitMqOptions
         RuleFor(options => options.User).NotEmpty();
         RuleFor(options => options.Password).NotEmpty();
         RuleFor(options => options.VirtualHost).NotEmpty();
+        RuleFor(options => options.NetworkRecoveryIntervalSeconds).GreaterThanOrEqualTo(1);
     }
 }

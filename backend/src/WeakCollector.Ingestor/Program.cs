@@ -2,7 +2,7 @@ using Serilog;
 using Serilog.Formatting.Compact;
 using WeakCollector.Ingestor.Polling;
 using WeakCollector.Ingestor.WeakApi;
-using WeakCollector.Messaging.DependencyInjection;
+using WeakCollector.Messaging;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(new CompactJsonFormatter())

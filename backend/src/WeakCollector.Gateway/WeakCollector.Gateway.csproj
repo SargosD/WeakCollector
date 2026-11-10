@@ -5,8 +5,4 @@
     <PackageReference Include="Serilog.Formatting.Compact" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\WeakCollector.Contracts\WeakCollector.Contracts.csproj" />
-  </ItemGroup>
-
 </Project>

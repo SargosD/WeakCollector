@@ -1,4 +1,4 @@
-namespace WeakCollector.Contracts.Messages;
+namespace WeakCollector.Messaging.Messages;
 
 public enum MeterType
 {

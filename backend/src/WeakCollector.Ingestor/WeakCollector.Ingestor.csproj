@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WeakCollector.Common\WeakCollector.Common.csproj" />
-    <ProjectReference Include="..\WeakCollector.Contracts\WeakCollector.Contracts.csproj" />
     <ProjectReference Include="..\WeakCollector.Messaging\WeakCollector.Messaging.csproj" />
   </ItemGroup>
 
