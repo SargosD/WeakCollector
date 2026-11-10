@@ -1,4 +1,7 @@
 using System.Net;
+using MassTransit.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using WeakCollector.Ingestor.Polling;
 using WeakCollector.Ingestor.Tests.Support;
 using WeakCollector.Messaging.Messages;
 using WeakCollector.Messaging.Topology;
@@ -11,16 +14,14 @@ public class IngestRunnerTests
     public async Task Publishes_batch_to_raw_exchange()
     {
         var handler = new ScriptedHandler().Respond(HttpStatusCode.OK, SampleMeters.ThreeTypes);
-        var publisher = new FakePublisher();
+        await using var services = await IngestorServices.StartAsync(handler);
 
-        var published = await IngestorServices.Runner(handler, publisher).RunAsync(CancellationToken.None);
+        var published = await services.GetRequiredService<IngestRunner>().RunAsync(CancellationToken.None);
 
         published.ShouldBeTrue();
-        publisher.MessagesOf<MeterMessage>().ShouldHaveSingleItem().Readings.Count.ShouldBe(3);
-        publisher.Published.Select(p => (p.Exchange, p.RoutingKey)).ShouldBe(
-        [
-            (TopologyNames.RawExchange, TopologyNames.MetersReceivedKey),
-        ]);
+        var message = PublishedBatches(services).ShouldHaveSingleItem();
+        message.Context.Message.Readings.Count.ShouldBe(3);
+        message.Context.DestinationAddress.ShouldNotBeNull().AbsolutePath.ShouldEndWith(TopologyNames.MetersPolledExchange);
     }
 
     [Fact]
@@ -30,26 +31,26 @@ public class IngestRunnerTests
             .Respond(HttpStatusCode.InternalServerError)
             .Throw(new HttpRequestException("The response ended prematurely.", new IOException()))
             .Respond(HttpStatusCode.OK, SampleMeters.ThreeTypes);
-        var publisher = new FakePublisher();
+        await using var services = await IngestorServices.StartAsync(handler);
 
-        var published = await IngestorServices.Runner(handler, publisher).RunAsync(CancellationToken.None);
+        var published = await services.GetRequiredService<IngestRunner>().RunAsync(CancellationToken.None);
 
         handler.Calls.ShouldBe(3);
         published.ShouldBeTrue();
-        publisher.MessagesOf<MeterMessage>().Count.ShouldBe(1);
+        PublishedBatches(services).Count.ShouldBe(1);
     }
 
     [Fact]
     public async Task Publishes_nothing_on_rate_limit()
     {
         var handler = new ScriptedHandler().Respond(HttpStatusCode.TooManyRequests);
-        var publisher = new FakePublisher();
+        await using var services = await IngestorServices.StartAsync(handler);
 
-        var published = await IngestorServices.Runner(handler, publisher).RunAsync(CancellationToken.None);
+        var published = await services.GetRequiredService<IngestRunner>().RunAsync(CancellationToken.None);
 
         handler.Calls.ShouldBe(1);
         published.ShouldBeFalse();
-        publisher.Published.ShouldBeEmpty();
+        PublishedBatches(services).ShouldBeEmpty();
     }
 
     [Fact]
@@ -60,24 +61,27 @@ public class IngestRunnerTests
             .Respond(HttpStatusCode.InternalServerError)
             .Respond(HttpStatusCode.InternalServerError)
             .Respond(HttpStatusCode.InternalServerError);
-        var publisher = new FakePublisher();
+        await using var services = await IngestorServices.StartAsync(handler);
 
-        var published = await IngestorServices.Runner(handler, publisher).RunAsync(CancellationToken.None);
+        var published = await services.GetRequiredService<IngestRunner>().RunAsync(CancellationToken.None);
 
         handler.Calls.ShouldBe(4);
         published.ShouldBeFalse();
-        publisher.Published.ShouldBeEmpty();
+        PublishedBatches(services).ShouldBeEmpty();
     }
 
     [Fact]
     public async Task Skips_unknown_meter_types_but_publishes_the_rest()
     {
         var handler = new ScriptedHandler().Respond(HttpStatusCode.OK, SampleMeters.WithUnknownType);
-        var publisher = new FakePublisher();
+        await using var services = await IngestorServices.StartAsync(handler);
 
-        var published = await IngestorServices.Runner(handler, publisher).RunAsync(CancellationToken.None);
+        var published = await services.GetRequiredService<IngestRunner>().RunAsync(CancellationToken.None);
 
         published.ShouldBeTrue();
-        publisher.MessagesOf<MeterMessage>().ShouldHaveSingleItem().Readings.Count.ShouldBe(1);
+        PublishedBatches(services).ShouldHaveSingleItem().Context.Message.Readings.Count.ShouldBe(1);
     }
+
+    private static List<IPublishedMessage<MetersPolled>> PublishedBatches(IServiceProvider services) =>
+        services.GetRequiredService<ITestHarness>().Published.Select<MetersPolled>().ToList();
 }

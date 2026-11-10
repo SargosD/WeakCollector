@@ -5,7 +5,7 @@ namespace WeakCollector.Ingestor.Polling;
 
 internal static class MeterMapper
 {
-    public static (MeterMessage Batch, IReadOnlyList<string> UnknownTypes) ToBatch(IReadOnlyList<MeterDto> meters, DateTimeOffset observedAt)
+    public static (MetersPolled Batch, IReadOnlyList<string> UnknownTypes) ToBatch(IReadOnlyList<MeterDto> meters, DateTimeOffset observedAt)
     {
         var readings = new List<MeterReading>(meters.Count);
         var unknownTypes = new List<string>();
@@ -22,7 +22,7 @@ internal static class MeterMapper
             }
         }
 
-        return (new MeterMessage(Guid.NewGuid(), observedAt, readings), unknownTypes);
+        return (new MetersPolled(Guid.NewGuid(), observedAt, readings), unknownTypes);
     }
 
     private static bool TryParseType(string value, out MeterType type)

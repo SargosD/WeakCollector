@@ -11,26 +11,18 @@ public class TopologyNamesTests
     {
         string[] names =
         [
-            TopologyNames.RawExchange,
-            TopologyNames.ProcessedExchange,
-            TopologyNames.DeadLetterExchange,
+            TopologyNames.MetersPolledExchange,
             TopologyNames.ProcessorQueue,
             TopologyNames.NotifierQueue,
-            TopologyNames.ProcessorDeadLetterQueue,
         ];
 
         names.ShouldBeUnique();
     }
 
-    [Theory]
-    [InlineData(TopologyNames.RawExchange)]
-    [InlineData(TopologyNames.ProcessedExchange)]
-    [InlineData(TopologyNames.DeadLetterExchange)]
-    [InlineData(TopologyNames.MetersReceivedKey)]
-    [InlineData(TopologyNames.MetersStoredKey)]
-    public void Exchanges_and_routing_keys_have_entity_and_one_more_segment(string name)
+    [Fact]
+    public void Exchanges_are_named_entity_event()
     {
-        name.ShouldMatch($@"^{Segment}\.{Segment}$");
+        TopologyNames.MetersPolledExchange.ShouldMatch($@"^{Segment}\.{Segment}$");
     }
 
     [Theory]

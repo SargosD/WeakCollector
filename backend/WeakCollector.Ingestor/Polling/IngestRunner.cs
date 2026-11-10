@@ -1,14 +1,13 @@
+using MassTransit;
 using Polly.CircuitBreaker;
 using Polly.Timeout;
 using WeakCollector.Ingestor.WeakApi;
-using WeakCollector.Messaging.Publishing;
-using WeakCollector.Messaging.Topology;
 
 namespace WeakCollector.Ingestor.Polling;
 
 internal sealed class IngestRunner(
     WeakApiClient client,
-    IMessagePublisher publisher,
+    IBus bus,
     TimeProvider timeProvider,
     ILogger<IngestRunner> logger)
 {
@@ -27,7 +26,7 @@ internal sealed class IngestRunner(
                 logger.LogWarning("Skipped reading with unknown meter type {MeterType}", unknownType);
             }
 
-            await publisher.PublishAsync(TopologyNames.RawExchange, TopologyNames.MetersReceivedKey, batch, cancellationToken);
+            await bus.Publish(batch, cancellationToken);
 
             logger.LogInformation(
                 "Published batch {BatchId} with {ReadingCount} readings in {LatencyMs} ms",
