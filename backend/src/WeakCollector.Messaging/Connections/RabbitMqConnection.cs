@@ -5,7 +5,6 @@ using WeakCollector.Messaging.Configuration;
 
 namespace WeakCollector.Messaging.Connections;
 
-
 public sealed class RabbitMqConnection(IOptions<RabbitMqOptions> options, ILogger<RabbitMqConnection> logger) : IAsyncDisposable
 {
     private readonly SemaphoreSlim _gate = new(1, 1);

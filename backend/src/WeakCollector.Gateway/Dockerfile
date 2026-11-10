@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY Directory.Build.props Directory.Packages.props nuget.config global.json stylecop.json ./
+COPY .editorconfig Directory.Build.props Directory.Packages.props nuget.config global.json stylecop.json ./
 COPY src/WeakCollector.Gateway/WeakCollector.Gateway.csproj src/WeakCollector.Gateway/
 RUN dotnet restore src/WeakCollector.Gateway/WeakCollector.Gateway.csproj
 

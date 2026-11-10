@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY Directory.Build.props Directory.Packages.props nuget.config global.json stylecop.json ./
+COPY .editorconfig Directory.Build.props Directory.Packages.props nuget.config global.json stylecop.json ./
 COPY src/WeakCollector.Common/WeakCollector.Common.csproj src/WeakCollector.Common/
 COPY src/WeakCollector.Messaging/WeakCollector.Messaging.csproj src/WeakCollector.Messaging/
 COPY src/WeakCollector.Processor/WeakCollector.Processor.csproj src/WeakCollector.Processor/
