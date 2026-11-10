@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WeakCollector.Contracts\WeakCollector.Contracts.csproj" />
+    <ProjectReference Include="..\WeakCollector.Messaging\WeakCollector.Messaging.csproj" />
   </ItemGroup>
 
 </Project>

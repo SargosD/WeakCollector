@@ -1,3 +1,4 @@
+# Lives in backend/ so Docker builds (context ./backend) read the same rules as local builds.
 root = true
 
 [*]
@@ -8,17 +9,8 @@ indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{json,yml,yaml,xml,props,targets,csproj,slnx}]
+[*.{json,xml,props,targets,csproj,slnx}]
 indent_size = 2
-
-[*.{js,jsx,ts,tsx,css,html,md}]
-indent_size = 2
-
-[*.md]
-trim_trailing_whitespace = false
-
-[*.{ps1,psm1}]
-end_of_line = crlf
 
 [*.cs]
 # Organisation
@@ -91,10 +83,11 @@ dotnet_diagnostic.SA1601.severity = none
 dotnet_diagnostic.SA1602.severity = none
 # SA1413: trailing comma in multi-line initializers. Enforced as warning.
 dotnet_diagnostic.SA1413.severity = warning
-# CA1848: use LoggerMessage delegates. Serilog structured logging is enough here.
+# CA1848 and CA1873: use LoggerMessage delegates. Serilog structured logging is enough here.
 dotnet_diagnostic.CA1848.severity = none
+dotnet_diagnostic.CA1873.severity = none
 
-[**/tests/**/*.cs]
+[tests/**/*.cs]
 # Tests do not need XML docs or the file-name-matches-type rule for fixture files.
 dotnet_diagnostic.SA1649.severity = none
 dotnet_diagnostic.CA1707.severity = none

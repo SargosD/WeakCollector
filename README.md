@@ -2,7 +2,7 @@
 
 WeakCollector collects data from the unstable WeakApp API.
 
-It polls the API, pushes every reading through RabbitMQ, stores it in PostgreSQL, and shows it on a React dashboard that reads over GraphQL and updates live over SignalR. The source API fails about half of its calls with 500, 502, 504, 429, or a dropped connection, so the collector is built around retries, a circuit breaker, and a record of every attempt.
+It polls the API, pushes the telemetry it receives through RabbitMQ, stores it in PostgreSQL, and shows it on a React dashboard that reads over GraphQL and updates live over SignalR. The source API fails about half of its calls with 500, 502, 504, 429, or a dropped connection, so the ingestor retries failed calls, stops calling for a while through a circuit breaker, and logs every failed poll.
 
 ## Services
 
@@ -59,10 +59,11 @@ Tests run on Microsoft.Testing.Platform with xunit v3, which `backend/global.jso
 ```
 backend/
   WeakCollector.slnx
-  src/        one project per service plus WeakCollector.Contracts
+  src/        one project per service plus the shared Common and Messaging
   tests/      one xunit project per service
 frontend/     React dashboard
 weak-api/     the provided unstable API
 ```
+
 
 Every change goes through a pull request into `main` and is squash-merged. Branch names follow `feature/<topic>`.

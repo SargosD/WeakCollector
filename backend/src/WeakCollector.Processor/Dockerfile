@@ -1,12 +1,14 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY Directory.Build.props Directory.Packages.props nuget.config global.json stylecop.json ./
-COPY src/WeakCollector.Contracts/WeakCollector.Contracts.csproj src/WeakCollector.Contracts/
+COPY .editorconfig Directory.Build.props Directory.Packages.props nuget.config global.json stylecop.json ./
+COPY src/WeakCollector.Common/WeakCollector.Common.csproj src/WeakCollector.Common/
+COPY src/WeakCollector.Messaging/WeakCollector.Messaging.csproj src/WeakCollector.Messaging/
 COPY src/WeakCollector.Processor/WeakCollector.Processor.csproj src/WeakCollector.Processor/
 RUN dotnet restore src/WeakCollector.Processor/WeakCollector.Processor.csproj
 
-COPY src/WeakCollector.Contracts/ src/WeakCollector.Contracts/
+COPY src/WeakCollector.Common/ src/WeakCollector.Common/
+COPY src/WeakCollector.Messaging/ src/WeakCollector.Messaging/
 COPY src/WeakCollector.Processor/ src/WeakCollector.Processor/
 RUN dotnet publish src/WeakCollector.Processor/WeakCollector.Processor.csproj \
     --configuration Release --no-restore --output /app
