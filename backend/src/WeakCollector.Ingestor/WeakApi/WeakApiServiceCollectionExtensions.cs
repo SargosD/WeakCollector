@@ -1,8 +1,7 @@
-using FluentValidation;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using Polly;
-using WeakCollector.Messaging.Configuration;
+using WeakCollector.Common.Configuration;
 
 namespace WeakCollector.Ingestor.WeakApi;
 
@@ -10,11 +9,7 @@ internal static class WeakApiServiceCollectionExtensions
 {
     public static IHttpClientBuilder AddWeakApiClient(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptions<WeakApiOptions>()
-            .Bind(configuration.GetSection(WeakApiOptions.SectionName))
-            .ValidateOnStart();
-        services.AddSingleton<IValidator<WeakApiOptions>, WeakApiOptionsValidator>();
-        services.AddSingleton<IValidateOptions<WeakApiOptions>, FluentValidateOptions<WeakApiOptions>>();
+        services.AddValidatedOptions<WeakApiOptions, WeakApiOptionsValidator>(configuration, WeakApiOptions.SectionName);
 
         var httpClientBuilder = services.AddHttpClient<WeakApiClient>((provider, client) =>
         {

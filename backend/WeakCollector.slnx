@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/WeakCollector.Common/WeakCollector.Common.csproj" />
     <Project Path="src/WeakCollector.Contracts/WeakCollector.Contracts.csproj" />
     <Project Path="src/WeakCollector.Gateway/WeakCollector.Gateway.csproj" />
     <Project Path="src/WeakCollector.Ingestor/WeakCollector.Ingestor.csproj" />

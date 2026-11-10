@@ -1,7 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.Options;
 
-namespace WeakCollector.Messaging.Configuration;
+namespace WeakCollector.Common.Configuration;
 
 public sealed class FluentValidateOptions<TOptions>(IValidator<TOptions> validator) : IValidateOptions<TOptions>
     where TOptions : class

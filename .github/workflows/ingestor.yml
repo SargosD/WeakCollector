@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "backend/src/WeakCollector.Ingestor/**"
+      - "backend/src/WeakCollector.Common/**"
       - "backend/src/WeakCollector.Contracts/**"
       - "backend/src/WeakCollector.Messaging/**"
       - "backend/tests/WeakCollector.Ingestor.Tests/**"
@@ -18,6 +19,7 @@ on:
   pull_request:
     paths:
       - "backend/src/WeakCollector.Ingestor/**"
+      - "backend/src/WeakCollector.Common/**"
       - "backend/src/WeakCollector.Contracts/**"
       - "backend/src/WeakCollector.Messaging/**"
       - "backend/tests/WeakCollector.Ingestor.Tests/**"
