@@ -37,7 +37,7 @@ public static class TopologyDeclarer
         await channel.QueueBindAsync(
             TopologyNames.ProcessorDeadLetterQueue,
             TopologyNames.DeadLetterExchange,
-            TopologyNames.TelemetryReceivedKey,
+            TopologyNames.MetersReceivedKey,
             cancellationToken: cancellationToken);
 
         var processQueueArguments = new Dictionary<string, object?>
@@ -56,7 +56,7 @@ public static class TopologyDeclarer
         await channel.QueueBindAsync(
             TopologyNames.ProcessorQueue,
             TopologyNames.RawExchange,
-            TopologyNames.TelemetryReceivedKey,
+            TopologyNames.MetersReceivedKey,
             cancellationToken: cancellationToken);
     }
 }

@@ -3,18 +3,18 @@ using WeakCollector.Messaging.Messages;
 
 namespace WeakCollector.Ingestor.Polling;
 
-internal static class TelemetryMapper
+internal static class MeterMapper
 {
-    public static (TelemetryBatch Batch, IReadOnlyList<string> UnknownTypes) ToBatch(IReadOnlyList<MeterDto> meters, DateTimeOffset observedAt)
+    public static (MeterMessage Batch, IReadOnlyList<string> UnknownTypes) ToBatch(IReadOnlyList<MeterDto> meters, DateTimeOffset observedAt)
     {
-        var records = new List<TelemetryRecord>(meters.Count);
+        var readings = new List<MeterReading>(meters.Count);
         var unknownTypes = new List<string>();
 
         foreach (var meter in meters)
         {
             if (TryParseType(meter.Type, out var type))
             {
-                records.Add(new TelemetryRecord(type, meter.Name, meter.Payload));
+                readings.Add(new MeterReading(type, meter.Name, meter.Payload));
             }
             else
             {
@@ -22,7 +22,7 @@ internal static class TelemetryMapper
             }
         }
 
-        return (new TelemetryBatch(Guid.NewGuid(), observedAt, records), unknownTypes);
+        return (new MeterMessage(Guid.NewGuid(), observedAt, readings), unknownTypes);
     }
 
     private static bool TryParseType(string value, out MeterType type)

@@ -16,10 +16,10 @@ public class IngestRunnerTests
         var published = await IngestorServices.Runner(handler, publisher).RunAsync(CancellationToken.None);
 
         published.ShouldBeTrue();
-        publisher.MessagesOf<TelemetryBatch>().ShouldHaveSingleItem().Records.Count.ShouldBe(3);
+        publisher.MessagesOf<MeterMessage>().ShouldHaveSingleItem().Readings.Count.ShouldBe(3);
         publisher.Published.Select(p => (p.Exchange, p.RoutingKey)).ShouldBe(
         [
-            (TopologyNames.RawExchange, TopologyNames.TelemetryReceivedKey),
+            (TopologyNames.RawExchange, TopologyNames.MetersReceivedKey),
         ]);
     }
 
@@ -36,7 +36,7 @@ public class IngestRunnerTests
 
         handler.Calls.ShouldBe(3);
         published.ShouldBeTrue();
-        publisher.MessagesOf<TelemetryBatch>().Count.ShouldBe(1);
+        publisher.MessagesOf<MeterMessage>().Count.ShouldBe(1);
     }
 
     [Fact]
@@ -78,6 +78,6 @@ public class IngestRunnerTests
         var published = await IngestorServices.Runner(handler, publisher).RunAsync(CancellationToken.None);
 
         published.ShouldBeTrue();
-        publisher.MessagesOf<TelemetryBatch>().ShouldHaveSingleItem().Records.Count.ShouldBe(1);
+        publisher.MessagesOf<MeterMessage>().ShouldHaveSingleItem().Readings.Count.ShouldBe(1);
     }
 }

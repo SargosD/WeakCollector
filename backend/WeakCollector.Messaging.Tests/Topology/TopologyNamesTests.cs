@@ -26,8 +26,8 @@ public class TopologyNamesTests
     [InlineData(TopologyNames.RawExchange)]
     [InlineData(TopologyNames.ProcessedExchange)]
     [InlineData(TopologyNames.DeadLetterExchange)]
-    [InlineData(TopologyNames.TelemetryReceivedKey)]
-    [InlineData(TopologyNames.TelemetryStoredKey)]
+    [InlineData(TopologyNames.MetersReceivedKey)]
+    [InlineData(TopologyNames.MetersStoredKey)]
     public void Exchanges_and_routing_keys_have_entity_and_one_more_segment(string name)
     {
         name.ShouldMatch($@"^{Segment}\.{Segment}$");

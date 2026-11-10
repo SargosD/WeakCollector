@@ -7,7 +7,7 @@ using WeakCollector.Messaging.Serialization;
 
 namespace WeakCollector.Ingestor.Tests.Polling;
 
-public class TelemetryMapperTests
+public class MeterMapperTests
 {
     private static readonly DateTimeOffset ObservedAt = new(2026, 10, 30, 8, 0, 0, TimeSpan.Zero);
 
@@ -16,20 +16,20 @@ public class TelemetryMapperTests
     {
         var meters = Parse(SampleMeters.ThreeTypes);
 
-        var mapped = TelemetryMapper.ToBatch(meters, ObservedAt);
+        var mapped = MeterMapper.ToBatch(meters, ObservedAt);
 
         mapped.UnknownTypes.ShouldBeEmpty();
         mapped.Batch.ObservedAt.ShouldBe(ObservedAt);
         mapped.Batch.BatchId.ShouldNotBe(Guid.Empty);
-        mapped.Batch.Records.Select(r => (r.Type, r.Location)).ShouldBe(
+        mapped.Batch.Readings.Select(r => (r.Type, r.Location)).ShouldBe(
         [
             (MeterType.AirQuality, "Garage"),
             (MeterType.Energy, "Bedroom"),
             (MeterType.Motion, "Kitchen"),
         ]);
-        mapped.Batch.Records[0].Payload.GetProperty("co2").GetInt32().ShouldBe(330);
-        mapped.Batch.Records[1].Payload.GetProperty("energy").GetDouble().ShouldBe(819.12);
-        mapped.Batch.Records[2].Payload.GetProperty("motionDetected").GetBoolean().ShouldBeTrue();
+        mapped.Batch.Readings[0].Payload.GetProperty("co2").GetInt32().ShouldBe(330);
+        mapped.Batch.Readings[1].Payload.GetProperty("energy").GetDouble().ShouldBe(819.12);
+        mapped.Batch.Readings[2].Payload.GetProperty("motionDetected").GetBoolean().ShouldBeTrue();
     }
 
     [Fact]
@@ -37,10 +37,10 @@ public class TelemetryMapperTests
     {
         var meters = Parse(SampleMeters.WithUnknownType);
 
-        var mapped = TelemetryMapper.ToBatch(meters, ObservedAt);
+        var mapped = MeterMapper.ToBatch(meters, ObservedAt);
 
-        mapped.Batch.Records.Count.ShouldBe(1);
-        mapped.Batch.Records[0].Type.ShouldBe(MeterType.Energy);
+        mapped.Batch.Readings.Count.ShouldBe(1);
+        mapped.Batch.Readings[0].Type.ShouldBe(MeterType.Energy);
         mapped.UnknownTypes.ShouldBe(["water"]);
     }
 

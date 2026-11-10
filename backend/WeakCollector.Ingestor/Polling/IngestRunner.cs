@@ -20,19 +20,19 @@ internal sealed class IngestRunner(
         try
         {
             var meters = await client.GetMetersAsync(cancellationToken);
-            var (batch, unknownTypes) = TelemetryMapper.ToBatch(meters, observedAt);
+            var (batch, unknownTypes) = MeterMapper.ToBatch(meters, observedAt);
 
             foreach (var unknownType in unknownTypes)
             {
-                logger.LogWarning("Skipped record with unknown meter type {MeterType}", unknownType);
+                logger.LogWarning("Skipped reading with unknown meter type {MeterType}", unknownType);
             }
 
-            await publisher.PublishAsync(TopologyNames.RawExchange, TopologyNames.TelemetryReceivedKey, batch, cancellationToken);
+            await publisher.PublishAsync(TopologyNames.RawExchange, TopologyNames.MetersReceivedKey, batch, cancellationToken);
 
             logger.LogInformation(
-                "Published batch {BatchId} with {RecordCount} records in {LatencyMs} ms",
+                "Published batch {BatchId} with {ReadingCount} readings in {LatencyMs} ms",
                 batch.BatchId,
-                batch.Records.Count,
+                batch.Readings.Count,
                 (long)timeProvider.GetElapsedTime(started).TotalMilliseconds);
             return true;
         }
