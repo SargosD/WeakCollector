@@ -31,6 +31,13 @@
     <PackageVersion Include="FluentValidation" Version="12.2.0" />
   </ItemGroup>
 
+  <!-- Data -->
+  <ItemGroup>
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageVersion Include="EFCore.NamingConventions" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14" />
+  </ItemGroup>
+
   <!-- Tests -->
   <ItemGroup>
     <PackageVersion Include="xunit.v3" Version="4.0.2" />

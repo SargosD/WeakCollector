@@ -91,3 +91,6 @@ dotnet_diagnostic.CA1873.severity = none
 # Tests do not need XML docs or the file-name-matches-type rule for fixture files.
 dotnet_diagnostic.SA1649.severity = none
 dotnet_diagnostic.CA1707.severity = none
+
+[**/Migrations/*.cs]
+generated_code = true

@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="WeakCollector.Common/WeakCollector.Common.csproj" />
+  <Project Path="WeakCollector.Data/WeakCollector.Data.csproj" />
   <Project Path="WeakCollector.Gateway/WeakCollector.Gateway.csproj" />
   <Project Path="WeakCollector.Ingestor/WeakCollector.Ingestor.csproj" />
   <Project Path="WeakCollector.Ingestor.Tests/WeakCollector.Ingestor.Tests.csproj" />

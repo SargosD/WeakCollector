@@ -53,6 +53,16 @@ services:
       timeout: 5s
       retries: 5
 
+  migrator:
+    build:
+      context: ./backend
+      dockerfile: WeakCollector.Data/Dockerfile
+    environment:
+      Database__ConnectionString: ${DATABASE_CONNECTION_STRING}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   ingestor:
     build:
       context: ./backend
