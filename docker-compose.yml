@@ -70,12 +70,19 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      processor:
+        condition: service_started
     restart: unless-stopped
 
   processor:
     build:
       context: ./backend
       dockerfile: WeakCollector.Processor/Dockerfile
+    environment:
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Port: 5672
+      RabbitMq__User: ${RABBITMQ_USER:-weakcollector}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:-weakcollector}
     depends_on:
       rabbitmq:
         condition: service_healthy

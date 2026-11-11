@@ -1,7 +1,10 @@
+using System.Text.Json;
 using MassTransit;
 using Polly.CircuitBreaker;
 using Polly.Timeout;
+using WeakCollector.Ingestor.Models;
 using WeakCollector.Ingestor.WeakApi;
+using WeakCollector.Messaging.Messages;
 
 namespace WeakCollector.Ingestor.Polling;
 
@@ -13,45 +16,42 @@ internal sealed class IngestRunner(
 {
     public async Task<bool> RunAsync(CancellationToken cancellationToken)
     {
-        var observedAt = timeProvider.GetUtcNow();
-        var started = timeProvider.GetTimestamp();
-
         try
         {
             var meters = await client.GetMetersAsync(cancellationToken);
-            var (batch, unknownTypes) = MeterMapper.ToBatch(meters, observedAt);
-
-            foreach (var unknownType in unknownTypes)
+            var polledAt = timeProvider.GetUtcNow();
+            if (meters.Count == 0)
             {
-                logger.LogWarning("Skipped reading with unknown meter type {MeterType}", unknownType);
+                logger.LogWarning("Poll returned no meters");
+                return false;
             }
 
-            await bus.Publish(batch, cancellationToken);
+            var message = CreateMetersPolledMessage(meters, polledAt);
 
-            logger.LogInformation(
-                "Published batch {BatchId} with {ReadingCount} readings in {LatencyMs} ms",
-                batch.BatchId,
-                batch.Readings.Count,
-                (long)timeProvider.GetElapsedTime(started).TotalMilliseconds);
+            await bus.Publish(message, cancellationToken);
+
             return true;
         }
         catch (HttpRequestException ex)
         {
             logger.LogWarning("Poll failed with status {StatusCode}: {Error}", (int?)ex.StatusCode, ex.Message);
         }
+        catch (JsonException ex)
+        {
+            logger.LogWarning("Poll returned invalid data: {Error}", ex.Message);
+        }
         catch (BrokenCircuitException)
         {
             logger.LogWarning("Poll skipped because the circuit is open");
         }
-        catch (TimeoutRejectedException)
-        {
-            logger.LogWarning("Poll timed out");
-        }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        catch (Exception ex) when (ex is TimeoutRejectedException or OperationCanceledException && !cancellationToken.IsCancellationRequested)
         {
             logger.LogWarning("Poll timed out");
         }
 
         return false;
     }
+
+    private static MetersPolled CreateMetersPolledMessage(IReadOnlyList<MeterDto> meters, DateTimeOffset polledAt) =>
+        new(Guid.NewGuid(), polledAt, [.. meters.Select(meter => new Meter(meter.Type, meter.Name, meter.Payload))]);
 }

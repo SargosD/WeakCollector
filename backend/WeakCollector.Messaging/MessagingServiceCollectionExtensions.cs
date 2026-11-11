@@ -4,8 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using WeakCollector.Common.Configuration;
 using WeakCollector.Messaging.Configuration;
-using WeakCollector.Messaging.Messages;
-using WeakCollector.Messaging.Topology;
 
 namespace WeakCollector.Messaging;
 
@@ -31,7 +29,10 @@ public static class MessagingServiceCollectionExtensions
                     host.Password(options.Password);
                 });
 
-                rabbit.Publish<MetersPolled>(publish => publish.BindQueue(TopologyNames.ProcessorQueue, TopologyNames.ProcessorQueue));
+                var retryDelay = TimeSpan.FromSeconds(options.RetryDelaySeconds);
+                var maxRetryDelay = TimeSpan.FromSeconds(options.MaxRetryDelaySeconds);
+                rabbit.UseMessageRetry(retry => retry.Exponential(options.RetryCount, retryDelay, maxRetryDelay, retryDelay));
+
                 rabbit.ConfigureEndpoints(context);
             });
         });

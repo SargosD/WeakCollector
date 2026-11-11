@@ -11,5 +11,8 @@ public sealed class RabbitMqOptionsValidator : AbstractValidator<RabbitMqOptions
         RuleFor(options => options.User).NotEmpty();
         RuleFor(options => options.Password).NotEmpty();
         RuleFor(options => options.VirtualHost).NotEmpty();
+        RuleFor(options => options.RetryCount).InclusiveBetween(0, 10);
+        RuleFor(options => options.RetryDelaySeconds).GreaterThanOrEqualTo(1);
+        RuleFor(options => options.MaxRetryDelaySeconds).GreaterThanOrEqualTo(options => options.RetryDelaySeconds);
     }
 }
