@@ -27,7 +27,7 @@
 
   <!-- Messaging and validation -->
   <ItemGroup>
-    <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
+    <PackageVersion Include="MassTransit.RabbitMQ" Version="8.5.12" />
     <PackageVersion Include="FluentValidation" Version="12.2.0" />
   </ItemGroup>
 

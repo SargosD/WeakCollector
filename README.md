@@ -2,7 +2,7 @@
 
 WeakCollector collects data from the unstable WeakApp API.
 
-It polls the API, pushes the telemetry it receives through RabbitMQ, stores it in PostgreSQL, and shows it on a React dashboard that reads over GraphQL and updates live over SignalR. The source API fails about half of its calls with 500, 502, 504, 429, or a dropped connection, so the ingestor retries failed calls, stops calling for a while through a circuit breaker, and logs every failed poll.
+It polls the API, pushes the meter readings it receives through RabbitMQ, stores it in PostgreSQL, and shows it on a React dashboard that reads over GraphQL and updates live over SignalR. The source API fails about half of its calls with 500, 502, 504, 429, or a dropped connection, so the ingestor retries failed calls, stops calling for a while through a circuit breaker, and logs every failed poll.
 
 ## Services
 

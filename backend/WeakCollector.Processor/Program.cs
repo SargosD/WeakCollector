@@ -1,5 +1,7 @@
 using Serilog;
 using Serilog.Formatting.Compact;
+using WeakCollector.Messaging;
+using WeakCollector.Processor.Consumers;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(new CompactJsonFormatter())
@@ -15,6 +17,8 @@ try
         .Enrich.FromLogContext()
         .Enrich.WithProperty("Service", "processor")
         .WriteTo.Console(new CompactJsonFormatter()));
+
+    builder.Services.AddRabbitMqMessaging(builder.Configuration, cfg => cfg.AddConsumer<MetersPolledConsumer>());
 
     var host = builder.Build();
     host.Run();

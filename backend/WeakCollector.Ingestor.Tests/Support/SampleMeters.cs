@@ -10,6 +10,20 @@ internal static class SampleMeters
         ]
         """;
 
+    public const string Corrupted = """{"error": "data corrupted"}""";
+
+    public const string MissingPayload = """
+        [
+          {"type":"energy","name":"Bedroom"}
+        ]
+        """;
+
+    public const string NullName = """
+        [
+          {"type":"energy","name":null,"payload":{"energy":819.12}}
+        ]
+        """;
+
     public const string WithUnknownType = """
         [
           {"type":"energy","name":"Bedroom","payload":{"energy":819.12}},

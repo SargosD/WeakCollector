@@ -14,5 +14,9 @@ public sealed class RabbitMqOptions
 
     public string VirtualHost { get; set; } = "/";
 
-    public int NetworkRecoveryIntervalSeconds { get; set; } = 5;
+    public int RetryCount { get; set; } = 5;
+
+    public int RetryDelaySeconds { get; set; } = 1;
+
+    public int MaxRetryDelaySeconds { get; set; } = 30;
 }

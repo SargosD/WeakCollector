@@ -21,6 +21,7 @@ try
 
     builder.Services.AddSingleton(TimeProvider.System);
     builder.Services.AddWeakApiClient(builder.Configuration);
+
     builder.Services.AddRabbitMqMessaging(builder.Configuration);
     builder.Services.AddSingleton<IngestRunner>();
     builder.Services.AddHostedService<MeterPoller>();
