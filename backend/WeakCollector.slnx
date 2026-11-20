@@ -1,6 +1,6 @@
 <Solution>
   <Project Path="WeakCollector.Data/WeakCollector.Data.csproj" />
-  <Project Path="WeakCollector.Gateway/WeakCollector.Gateway.csproj" />
+  <Project Path="WeakCollector.GraphQL.Api/WeakCollector.GraphQL.Api.csproj" />
   <Project Path="WeakCollector.Ingestor/WeakCollector.Ingestor.csproj" />
   <Project Path="WeakCollector.Ingestor.Tests/WeakCollector.Ingestor.Tests.csproj" />
   <Project Path="WeakCollector.Messaging/WeakCollector.Messaging.csproj" />

@@ -14,7 +14,7 @@ public sealed class WeakApiOptions
     public string ApiKey { get; set; } = string.Empty;
 
     [Range(1, int.MaxValue)]
-    public int PollIntervalSeconds { get; set; } = 10;
+    public int PollIntervalSeconds { get; set; } = 60;
 
     [Range(1, int.MaxValue)]
     public int AttemptTimeoutSeconds { get; set; } = 5;

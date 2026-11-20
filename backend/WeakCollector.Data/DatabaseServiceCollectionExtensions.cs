@@ -15,7 +15,7 @@ public static class DatabaseServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.AddDbContext<WeakCollectorDbContext>((provider, options) =>
+        services.AddDbContextFactory<WeakCollectorDbContext>((provider, options) =>
         {
             var database = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
             options.UseNpgsql(database.ConnectionString).UseSnakeCaseNamingConvention();
