@@ -10,10 +10,20 @@ It polls the API, pushes the meter readings it receives through RabbitMQ, stores
 | --- | --- |
 | `weak-api` | The provided unstable API. Unchanged. |
 | `WeakCollector.Ingestor` | Polls `/meters` and publishes each batch to RabbitMQ. |
-| `WeakCollector.Processor` | Validates batches and stores them in PostgreSQL. |
+| `WeakCollector.Processor` | Splits each meter's payload into measurements and stores them in PostgreSQL. |
 | `WeakCollector.Gateway` | GraphQL and REST API over the database. |
 | `WeakCollector.Notifier` | SignalR hub that pushes new batches to browsers. |
 | `frontend` | React dashboard. |
+
+## Data model
+
+| Table | Holds |
+| --- | --- |
+| `locations` | A room, unique by name. |
+| `meter_readings` | One meter's data at one poll: type, location and poll time. |
+| `measurements` | One payload field of a reading: name, value as text and value type (`Number`, `Boolean`, `Text`). |
+
+Nothing in the tables depends on WeakApp's field names, so a new meter type or field needs no migration.
 
 ## Run it
 
@@ -59,7 +69,7 @@ Tests run on Microsoft.Testing.Platform with xunit v3, which `backend/global.jso
 ```
 backend/
   WeakCollector.slnx
-  WeakCollector.<Name>/         one project per service plus the shared Common and Messaging
+  WeakCollector.<Name>/         one project per service plus the shared Messaging
   WeakCollector.<Name>.Tests/   one xunit project per service
 frontend/     React dashboard
 weak-api/     the provided unstable API

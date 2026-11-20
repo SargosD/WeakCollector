@@ -13,7 +13,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\WeakCollector.Data\WeakCollector.Data.csproj" />
     <ProjectReference Include="..\WeakCollector.Messaging\WeakCollector.Messaging.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="WeakCollector.Processor.Tests" />
   </ItemGroup>
 
 </Project>

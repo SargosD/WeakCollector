@@ -1,17 +1,16 @@
+using System.ComponentModel.DataAnnotations;
 using WeakCollector.Ingestor.Configuration;
 
 namespace WeakCollector.Ingestor.Tests.WeakApi;
 
-public class WeakApiOptionsValidatorTests
+public class WeakApiOptionsTests
 {
-    private readonly WeakApiOptionsValidator _validator = new();
-
     [Fact]
     public void Accepts_complete_options()
     {
         var options = new WeakApiOptions { BaseUrl = "http://weak-api:8080", ApiKey = "supersecret" };
 
-        _validator.Validate(options).IsValid.ShouldBeTrue();
+        Validate(options).ShouldBeEmpty();
     }
 
     [Fact]
@@ -19,10 +18,7 @@ public class WeakApiOptionsValidatorTests
     {
         var options = new WeakApiOptions { BaseUrl = "http://weak-api:8080" };
 
-        var result = _validator.Validate(options);
-
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.PropertyName == nameof(WeakApiOptions.ApiKey));
+        Validate(options).ShouldContain(r => r.MemberNames.Contains(nameof(WeakApiOptions.ApiKey)));
     }
 
     [Theory]
@@ -33,10 +29,7 @@ public class WeakApiOptionsValidatorTests
     {
         var options = new WeakApiOptions { BaseUrl = baseUrl, ApiKey = "supersecret" };
 
-        var result = _validator.Validate(options);
-
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.PropertyName == nameof(WeakApiOptions.BaseUrl));
+        Validate(options).ShouldContain(r => r.MemberNames.Contains(nameof(WeakApiOptions.BaseUrl)));
     }
 
     [Fact]
@@ -44,6 +37,13 @@ public class WeakApiOptionsValidatorTests
     {
         var options = new WeakApiOptions { BaseUrl = "http://weak-api:8080", ApiKey = "supersecret", PollIntervalSeconds = 0 };
 
-        _validator.Validate(options).IsValid.ShouldBeFalse();
+        Validate(options).ShouldContain(r => r.MemberNames.Contains(nameof(WeakApiOptions.PollIntervalSeconds)));
+    }
+
+    private static List<ValidationResult> Validate(WeakApiOptions options)
+    {
+        var results = new List<ValidationResult>();
+        Validator.TryValidateObject(options, new ValidationContext(options), results, validateAllProperties: true);
+        return results;
     }
 }

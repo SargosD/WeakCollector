@@ -2,7 +2,6 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using WeakCollector.Common.Configuration;
 using WeakCollector.Messaging.Configuration;
 
 namespace WeakCollector.Messaging;
@@ -14,7 +13,13 @@ public static class MessagingServiceCollectionExtensions
         IConfiguration configuration,
         Action<IBusRegistrationConfigurator>? configureBus = null)
     {
-        services.AddValidatedOptions<RabbitMqOptions, RabbitMqOptionsValidator>(configuration, RabbitMqOptions.SectionName);
+        services.AddOptions<RabbitMqOptions>()
+            .Bind(configuration.GetSection(RabbitMqOptions.SectionName))
+            .ValidateDataAnnotations()
+            .Validate(
+                options => options.MaxRetryDelaySeconds >= options.RetryDelaySeconds,
+                "MaxRetryDelaySeconds must be greater than or equal to RetryDelaySeconds.")
+            .ValidateOnStart();
 
         services.AddMassTransit(bus =>
         {

@@ -53,6 +53,15 @@ services:
       timeout: 5s
       retries: 5
 
+  migrator:
+    build:
+      context: ./backend
+      dockerfile: WeakCollector.Data/Dockerfile
+    command: ["--connection", "${DATABASE_CONNECTION_STRING}"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   ingestor:
     build:
       context: ./backend
@@ -83,11 +92,12 @@ services:
       RabbitMq__Port: 5672
       RabbitMq__User: ${RABBITMQ_USER:-weakcollector}
       RabbitMq__Password: ${RABBITMQ_PASSWORD:-weakcollector}
+      Database__ConnectionString: ${DATABASE_CONNECTION_STRING}
     depends_on:
       rabbitmq:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   gateway:
@@ -97,8 +107,8 @@ services:
     ports:
       - "${GATEWAY_PORT:-5000}:8080"
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     healthcheck: *dotnet-healthcheck
     restart: unless-stopped
 

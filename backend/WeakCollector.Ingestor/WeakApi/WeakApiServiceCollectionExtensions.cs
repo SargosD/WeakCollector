@@ -3,7 +3,6 @@ using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Timeout;
-using WeakCollector.Common.Configuration;
 using WeakCollector.Ingestor.Configuration;
 
 namespace WeakCollector.Ingestor.WeakApi;
@@ -12,7 +11,10 @@ internal static class WeakApiServiceCollectionExtensions
 {
     public static IHttpClientBuilder AddWeakApiClient(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddValidatedOptions<WeakApiOptions, WeakApiOptionsValidator>(configuration, WeakApiOptions.SectionName);
+        services.AddOptions<WeakApiOptions>()
+            .Bind(configuration.GetSection(WeakApiOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         var httpClientBuilder = services.AddHttpClient<WeakApiClient>((provider, client) =>
         {
