@@ -15,4 +15,4 @@ FROM mcr.microsoft.com/dotnet/runtime-deps:10.0 AS final
 WORKDIR /app
 COPY --from=build /app/efbundle .
 USER $APP_UID
-ENTRYPOINT ["sh", "-c", "exec ./efbundle --connection \"$Database__ConnectionString\""]
+ENTRYPOINT ["./efbundle"]

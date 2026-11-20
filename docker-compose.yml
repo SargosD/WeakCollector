@@ -57,8 +57,7 @@ services:
     build:
       context: ./backend
       dockerfile: WeakCollector.Data/Dockerfile
-    environment:
-      Database__ConnectionString: ${DATABASE_CONNECTION_STRING}
+    command: ["--connection", "${DATABASE_CONNECTION_STRING}"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -108,8 +107,8 @@ services:
     ports:
       - "${GATEWAY_PORT:-5000}:8080"
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     healthcheck: *dotnet-healthcheck
     restart: unless-stopped
 
