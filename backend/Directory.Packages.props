@@ -40,6 +40,12 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.14" />
   </ItemGroup>
 
+  <!-- GraphQL -->
+  <ItemGroup>
+    <PackageVersion Include="HotChocolate.AspNetCore" Version="16.7.6" />
+    <PackageVersion Include="HotChocolate.Data.EntityFramework" Version="16.7.6" />
+  </ItemGroup>
+
   <!-- Tests -->
   <ItemGroup>
     <PackageVersion Include="xunit.v3" Version="4.0.2" />

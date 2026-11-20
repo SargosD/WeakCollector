@@ -69,7 +69,7 @@ services:
     environment:
       WeakApi__BaseUrl: http://weak-api:8080
       WeakApi__ApiKey: ${WEAKAPI_KEY:-supersecret}
-      WeakApi__PollIntervalSeconds: ${POLL_INTERVAL_SECONDS:-10}
+      WeakApi__PollIntervalSeconds: ${POLL_INTERVAL_SECONDS:-60}
       RabbitMq__Host: rabbitmq
       RabbitMq__Port: 5672
       RabbitMq__User: ${RABBITMQ_USER:-weakcollector}
@@ -100,12 +100,14 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
-  gateway:
+  graphql-api:
     build:
       context: ./backend
-      dockerfile: WeakCollector.Gateway/Dockerfile
+      dockerfile: WeakCollector.GraphQL.Api/Dockerfile
+    environment:
+      Database__ConnectionString: ${DATABASE_CONNECTION_STRING}
     ports:
-      - "${GATEWAY_PORT:-5000}:8080"
+      - "${GRAPHQL_API_PORT:-5000}:8080"
     depends_on:
       migrator:
         condition: service_completed_successfully
@@ -130,7 +132,7 @@ services:
     ports:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:
-      gateway:
+      graphql-api:
         condition: service_healthy
       notifier:
         condition: service_healthy

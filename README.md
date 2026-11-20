@@ -11,7 +11,7 @@ It polls the API, pushes the meter readings it receives through RabbitMQ, stores
 | `weak-api` | The provided unstable API. Unchanged. |
 | `WeakCollector.Ingestor` | Polls `/meters` and publishes each batch to RabbitMQ. |
 | `WeakCollector.Processor` | Splits each meter's payload into measurements and stores them in PostgreSQL. |
-| `WeakCollector.Gateway` | GraphQL and REST API over the database. |
+| `WeakCollector.GraphQL.Api` | GraphQL and REST API over the database. |
 | `WeakCollector.Notifier` | SignalR hub that pushes new batches to browsers. |
 | `frontend` | React dashboard. |
 
@@ -36,7 +36,7 @@ docker compose up --build
 | What | URL |
 | --- | --- |
 | Dashboard | http://localhost:3000 |
-| Gateway health | http://localhost:5000/health |
+| GraphQL API health | http://localhost:5000/health |
 | Notifier health | http://localhost:5001/health |
 | RabbitMQ management | http://localhost:15672 (weakcollector / weakcollector) |
 | WeakApp API | http://localhost:8080/meters with header `X-Api-Key: supersecret` |
