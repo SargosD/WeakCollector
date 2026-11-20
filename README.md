@@ -59,7 +59,7 @@ Tests run on Microsoft.Testing.Platform with xunit v3, which `backend/global.jso
 ```
 backend/
   WeakCollector.slnx
-  WeakCollector.<Name>/         one project per service plus the shared Common and Messaging
+  WeakCollector.<Name>/         one project per service plus the shared Messaging
   WeakCollector.<Name>.Tests/   one xunit project per service
 frontend/     React dashboard
 weak-api/     the provided unstable API
