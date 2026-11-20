@@ -16,7 +16,5 @@ internal static class SamplePolls
                 new Meter("energy", "Bedroom", Payload("""{"energy":819.12}""")),
             ]);
 
-    public static MetersPolled Empty() => new(Guid.NewGuid(), PolledAt, []);
-
     public static JsonElement Payload(string json) => JsonDocument.Parse(json).RootElement.Clone();
 }
