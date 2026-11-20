@@ -93,11 +93,12 @@ services:
       RabbitMq__Port: 5672
       RabbitMq__User: ${RABBITMQ_USER:-weakcollector}
       RabbitMq__Password: ${RABBITMQ_PASSWORD:-weakcollector}
+      Database__ConnectionString: ${DATABASE_CONNECTION_STRING}
     depends_on:
       rabbitmq:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   gateway:

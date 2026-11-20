@@ -1,5 +1,6 @@
 using Serilog;
 using Serilog.Formatting.Compact;
+using WeakCollector.Data;
 using WeakCollector.Messaging;
 using WeakCollector.Processor.Consumers;
 
@@ -18,6 +19,7 @@ try
         .Enrich.WithProperty("Service", "processor")
         .WriteTo.Console(new CompactJsonFormatter()));
 
+    builder.Services.AddWeakCollectorDatabase(builder.Configuration);
     builder.Services.AddRabbitMqMessaging(builder.Configuration, cfg => cfg.AddConsumer<MetersPolledConsumer>());
 
     var host = builder.Build();
