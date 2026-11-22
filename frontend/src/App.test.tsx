@@ -1,9 +1,14 @@
 import { render, screen } from '@testing-library/react'
+import { vi } from 'vitest'
 import App from './App.tsx'
 
+vi.mock('./pages/DashboardPage', () => ({
+  DashboardPage: () => <div>Dashboard page</div>,
+}))
+
 describe('App', () => {
-  it('renders the title', () => {
+  it('renders the dashboard', () => {
     render(<App />)
-    expect(screen.getByRole('heading', { name: 'WeakCollector' })).toBeInTheDocument()
+    expect(screen.getByText('Dashboard page')).toBeInTheDocument()
   })
 })

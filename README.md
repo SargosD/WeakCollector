@@ -1,60 +1,82 @@
 # WeakCollector
 
-WeakCollector collects data from the unstable WeakApp API.
+Collects meter data from the unstable WeakApp API, stores it in PostgreSQL, and serves a React dashboard over GraphQL.
 
-It polls the API, pushes the meter readings it receives through RabbitMQ, stores it in PostgreSQL, and shows it on a React dashboard that reads over GraphQL and updates live over SignalR. The source API fails about half of its calls with 500, 502, 504, 429, or a dropped connection, so the ingestor retries failed calls, stops calling for a while through a circuit breaker, and logs every failed poll.
+The API fails many calls (500, 502, 504, 429, dropped connections). The ingestor retries, uses a circuit breaker, and logs failed polls.
 
 ## Services
 
 | Service | Role |
 | --- | --- |
-| `weak-api` | The provided unstable API. Unchanged. |
-| `WeakCollector.Ingestor` | Polls `/meters` and publishes each batch to RabbitMQ. |
-| `WeakCollector.Processor` | Splits each meter's payload into measurements and stores them in PostgreSQL. |
-| `WeakCollector.GraphQL.Api` | GraphQL and REST API over the database. |
-| `WeakCollector.Notifier` | SignalR hub that pushes new batches to browsers. |
+| `weak-api` | Provided unstable API. |
+| `WeakCollector.Ingestor` | Polls `/meters`, publishes batches to RabbitMQ. |
+| `WeakCollector.Processor` | Splits payloads into measurements, writes PostgreSQL. |
+| `WeakCollector.GraphQL.Api` | GraphQL and REST API. |
+| `WeakCollector.Notifier` | SignalR hub for live updates. |
 | `frontend` | React dashboard. |
 
-## Data model
+## Data
 
 | Table | Holds |
 | --- | --- |
-| `locations` | A room, unique by name. |
-| `meter_readings` | One meter's data at one poll: type, location and poll time. |
-| `measurements` | One payload field of a reading: name, value as text and value type (`Number`, `Boolean`, `Text`). |
+| `locations` | Room name, unique. |
+| `meter_readings` | One meter at one poll: type, location, poll time. |
+| `measurements` | One payload field: name, text value, value type. |
 
-Nothing in the tables depends on WeakApp's field names, so a new meter type or field needs no migration.
+The schema does not depend on WeakApp field names, so new fields need no migration.
 
-## Run it
+## Run
 
 Requires Docker Desktop.
 
-```
+```sh
+cp .env.example .env
 docker compose up --build
 ```
 
 | What | URL |
 | --- | --- |
 | Dashboard | http://localhost:3000 |
-| GraphQL API health | http://localhost:5000/health |
+| GraphQL health | http://localhost:5000/health |
 | Notifier health | http://localhost:5001/health |
-| RabbitMQ management | http://localhost:15672 (weakcollector / weakcollector) |
-| WeakApp API | http://localhost:8080/meters with header `X-Api-Key: supersecret` |
+| RabbitMQ | http://localhost:15672 (weakcollector / weakcollector) |
+| WeakApp API | http://localhost:8080/meters, header `X-Api-Key: supersecret` |
 
-Ports and credentials come from `.env`. Copy `.env.example` to `.env` to change them. Without a `.env` the defaults above apply.
+Ports and credentials come from `.env`. `GRAPHQL_URL` is required.
+
+## GraphQL
+
+The browser calls `/graphql` on its own origin. Vite proxies it in development; nginx proxies it in Docker and Azure. Both read `GRAPHQL_URL`.
+
+```sh
+# frontend/.env (local development)
+GRAPHQL_URL=http://localhost:5000/graphql
+
+# root .env (Compose)
+GRAPHQL_URL=http://graphql-api:8080/graphql
+```
+
+Use the full URL without a trailing slash. The container fails to start if it is missing.
+
+Queries live in `frontend/src/graphql/queries.graphql`. Generated types are committed in `frontend/src/types/graphql.ts`. After schema changes, with the API running:
+
+```sh
+cd frontend
+npm run codegen
+```
 
 ## Develop
 
-Requires the .NET 10 SDK and Node 24.
+Requires .NET 10 and Node 24.
 
-```
+```sh
 cd backend
 dotnet build
 dotnet test
 dotnet format --verify-no-changes
 ```
 
-```
+```sh
 cd frontend
 npm install
 npm run dev
@@ -62,18 +84,12 @@ npm run lint
 npm test
 ```
 
-Tests run on Microsoft.Testing.Platform with xunit v3, which `backend/global.json` turns on.
-
 ## Layout
 
-```
-backend/
-  WeakCollector.slnx
-  WeakCollector.<Name>/         one project per service plus the shared Messaging
-  WeakCollector.<Name>.Tests/   one xunit project per service
+```text
+backend/      .NET services and tests
 frontend/     React dashboard
-weak-api/     the provided unstable API
+weak-api/     provided unstable API
 ```
 
-
-Every change goes through a pull request into `main` and is squash-merged. Branch names follow `feature/<topic>`.
+Every change goes through a PR into `main` and is squash-merged. Use `feature/<topic>` branches.

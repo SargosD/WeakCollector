@@ -1,0 +1,6 @@
+query Locations {
+  locations {
+    id
+    name
+  }
+}
