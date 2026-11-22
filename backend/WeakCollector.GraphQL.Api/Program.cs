@@ -27,13 +27,14 @@ try
         .AddQueryType<Query>()
         .AddFiltering()
         .AddSorting()
-        .AddProjections();
+        .AddProjections()
+        .DisableIntrospection(!builder.Environment.IsDevelopment());
 
     var app = builder.Build();
 
     app.UseSerilogRequestLogging();
     app.MapHealthChecks("/health");
-    app.MapGraphQL();
+    app.MapGraphQL().WithOptions(options => options.Tool.Enable = app.Environment.IsDevelopment());
 
     app.Run();
     return 0;

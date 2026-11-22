@@ -7,5 +7,6 @@ export function createGraphQLClient() {
     url: GRAPHQL_ROUTE,
     exchanges: [cacheExchange, fetchExchange],
     requestPolicy: 'cache-and-network',
+    preferGetMethod: false,
   })
 }

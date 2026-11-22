@@ -58,7 +58,7 @@ GRAPHQL_URL=http://graphql-api:8080/graphql
 
 Use the full URL without a trailing slash. The container fails to start if it is missing.
 
-Queries live in `frontend/src/services/graphql/queries.graphql`. Generated types are committed in `frontend/src/types/graphql`. After schema changes, with the API running:
+Queries live in `frontend/src/graphql/queries.graphql`. Generated types are committed in `frontend/src/types/graphql.ts`. After schema changes, with the API running:
 
 ```sh
 cd frontend

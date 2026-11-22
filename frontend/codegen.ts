@@ -11,7 +11,7 @@ const config: CodegenConfig = {
   schema: graphqlUrl,
   documents: 'src/**/*.graphql',
   generates: {
-    'src/types/graphql/graphql.ts': {
+    'src/types/graphql.ts': {
       plugins: ['typescript', 'typescript-operations', 'typed-document-node'],
       config: {
         useTypeImports: true,

@@ -1,5 +1,5 @@
-import { LocationsList } from '../components/locations/LocationsList'
+import { DashboardHeader } from '../components/dashboard/DashboardHeader'
 
 export function DashboardPage() {
-  return <LocationsList />
+  return <DashboardHeader />
 }

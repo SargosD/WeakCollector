@@ -7,8 +7,8 @@ vi.mock('./pages/DashboardPage', () => ({
 }))
 
 describe('App', () => {
-  it('renders the title', () => {
+  it('renders the dashboard', () => {
     render(<App />)
-    expect(screen.getByRole('heading', { name: 'WeakCollector' })).toBeInTheDocument()
+    expect(screen.getByText('Dashboard page')).toBeInTheDocument()
   })
 })

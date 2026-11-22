@@ -105,6 +105,7 @@ services:
       context: ./backend
       dockerfile: WeakCollector.GraphQL.Api/Dockerfile
     environment:
+      ASPNETCORE_ENVIRONMENT: Development
       Database__ConnectionString: ${DATABASE_CONNECTION_STRING}
     ports:
       - "${GRAPHQL_API_PORT:-5000}:8080"
