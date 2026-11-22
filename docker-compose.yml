@@ -129,6 +129,8 @@ services:
   frontend:
     build:
       context: ./frontend
+    environment:
+      GRAPHQL_URL: ${GRAPHQL_URL:?GRAPHQL_URL is required}
     ports:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:

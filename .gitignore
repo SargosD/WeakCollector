@@ -34,7 +34,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 .eslintcache
-frontend/src/gql/generated/
 
 # Environment and secrets
 .env

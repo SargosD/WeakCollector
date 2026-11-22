@@ -1,5 +1,5 @@
 dist
 coverage
 node_modules
-src/gql/generated
+src/types/graphql
 package-lock.json
