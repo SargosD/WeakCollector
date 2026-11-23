@@ -1,4 +1,4 @@
-import { MeasurementValueType } from '../types/graphql'
+import { MeasurementValueType } from '../../../types/graphql'
 import type {
   FieldSpec,
   FormattedReading,
@@ -6,7 +6,7 @@ import type {
   Reading,
   ReadingRow,
   TypeSpec,
-} from '../types/readings'
+} from '../../../types/readings'
 
 const KnownTypes: Record<string, TypeSpec> = {
   energy: {

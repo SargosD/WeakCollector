@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { MeasurementValueType } from '../types/graphql'
-import type { Reading } from '../types/readings'
+import { MeasurementValueType } from '../../../types/graphql'
+import type { Reading } from '../../../types/readings'
 import { formatReading } from './formatReading'
 
 function measurement(
@@ -13,7 +13,7 @@ function measurement(
 }
 
 function reading(type: string, measurements: Reading['measurements']): Reading {
-  return { id: 1, polledAt: '2026-11-20T12:00:00Z', type, measurements }
+  return { id: 1, location: 'Kitchen', polledAt: '2026-11-20T12:00:00Z', type, measurements }
 }
 
 describe('formatReading', () => {

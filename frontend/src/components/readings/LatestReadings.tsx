@@ -1,58 +1,90 @@
+import { AlertCircleIcon } from 'lucide-react'
 import { useQuery } from 'urql'
-import { useLocationSelection } from '../../contexts/locationSelection'
+import { LatestReadingsDocument, type LatestReadingsQuery } from '../../types/graphql'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import {
-  LatestReadingsDocument,
-  type LatestReadingsQuery,
-  type LatestReadingsQueryVariables,
-} from '../../types/graphql'
-import { ReadingCard } from './ReadingCard'
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel'
+import { Spinner } from '@/components/ui/spinner'
+import { formatReading } from './utils/formatReading'
+import { groupReadingsByLocation } from './utils/groupReadings'
 
 export function LatestReadings() {
-  const { selectedLocationId } = useLocationSelection()
-  const [result] = useQuery<LatestReadingsQuery, LatestReadingsQueryVariables>({
-    query: LatestReadingsDocument,
-    variables: { locationId: selectedLocationId ?? 0 },
-    pause: selectedLocationId === null,
-  })
+  const [result] = useQuery<LatestReadingsQuery>({ query: LatestReadingsDocument })
 
   const readings = result.data?.latestMeterReadings ?? []
-  const lastPolledAt =
-    readings.length > 0
-      ? new Date(Math.max(...readings.map((reading) => new Date(reading.polledAt).getTime())))
-      : null
+  const locations = groupReadingsByLocation(readings)
+  const hasError = Boolean(result.error) || (Boolean(result.data) && readings.length === 0)
 
   return (
-    <section aria-labelledby="latest-readings-title">
-      <header className="mb-3 flex items-baseline justify-between gap-3">
-        <h2 id="latest-readings-title" className="text-xl font-semibold">
-          Latest values
-        </h2>
-        {lastPolledAt && (
-          <time
-            dateTime={lastPolledAt.toISOString()}
-            className="text-sm text-slate-500 dark:text-slate-400"
-          >
-            Last polled at {lastPolledAt.toLocaleString()}
-          </time>
-        )}
-      </header>
-      {selectedLocationId === null && <p className="text-sm text-slate-500">Select a location.</p>}
-      {selectedLocationId !== null && result.fetching && !result.data && (
-        <p className="text-sm text-slate-500">Loading latest values…</p>
-      )}
-      {result.error && <p role="alert">Could not load latest values.</p>}
-      {selectedLocationId !== null &&
-        !result.fetching &&
-        !result.error &&
-        readings.length === 0 && (
-          <p className="text-sm text-slate-500">No readings have been collected yet.</p>
-        )}
-      {readings.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {readings.map((reading) => (
-            <ReadingCard key={reading.id} reading={reading} />
-          ))}
+    <section
+      aria-label="Latest values"
+      className="flex min-h-64 items-center justify-center"
+    >
+      {hasError && (
+        <div
+          role="alert"
+          className="flex flex-col items-center justify-center gap-2 text-sm text-destructive"
+        >
+          <AlertCircleIcon aria-hidden="true" className="size-8" />
+          <span>Could not load latest values.</span>
         </div>
+      )}
+
+      {result.fetching && !result.data && (
+        <Spinner aria-label="Loading latest values" className="size-5 text-muted-foreground" />
+      )}
+
+      {!hasError && readings.length > 0 && (
+        <Carousel opts={{ align: 'start' }} className="w-full">
+          <CarouselContent>
+            {locations.map(([location, locationReadings]) => (
+              <CarouselItem
+                key={location}
+                className="basis-full sm:basis-1/2 lg:basis-1/3"
+              >
+                <article className="h-full">
+                  <Card className="h-full">
+                    <CardHeader className="pb-3">
+                      <h3 className="text-sm font-semibold">{location}</h3>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {locationReadings.map((reading, index) => {
+                        const { title, rows } = formatReading(reading)
+
+                        return (
+                          <section
+                            key={reading.id}
+                            className={index > 0 ? 'border-t border-border pt-3' : ''}
+                          >
+                            <h4 className="mb-1 text-xs text-muted-foreground">{title}</h4>
+                            <dl className="space-y-1">
+                              {rows.map((row) => (
+                                <div
+                                  key={row.label}
+                                  className="flex justify-between gap-3 text-sm"
+                                >
+                                  <dt className="text-muted-foreground">{row.label}</dt>
+                                  <dd className="font-medium tabular-nums">{row.value}</dd>
+                                </div>
+                              ))}
+                            </dl>
+                          </section>
+                        )
+                      })}
+                    </CardContent>
+                  </Card>
+                </article>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       )}
     </section>
   )

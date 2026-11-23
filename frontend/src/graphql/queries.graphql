@@ -1,13 +1,7 @@
-query Locations {
-  locations {
+query LatestReadings {
+  latestMeterReadings {
     id
-    name
-  }
-}
-
-query LatestReadings($locationId: Long!) {
-  latestMeterReadings(locationId: $locationId) {
-    id
+    location
     polledAt
     type
     measurements {
