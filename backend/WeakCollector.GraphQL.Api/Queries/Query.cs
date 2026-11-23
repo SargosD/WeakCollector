@@ -9,10 +9,13 @@ public sealed class Query
     public IQueryable<Location> GetLocations(WeakCollectorDbContext db) =>
         db.Locations.AsNoTracking().OrderBy(location => location.Name);
 
-    [UsePaging]
     [UseProjection]
-    [UseFiltering]
-    [UseSorting]
-    public IQueryable<MeterReading> GetMeterReadings(WeakCollectorDbContext db) =>
-        db.MeterReadings.AsNoTracking().OrderByDescending(reading => reading.PolledAt);
+    public IQueryable<MeterReading> GetLatestMeterReadings(WeakCollectorDbContext db, long locationId) =>
+        db.MeterReadings
+            .AsNoTracking()
+            .Where(reading => reading.LocationId == locationId
+                && !db.MeterReadings.Any(newer => newer.LocationId == locationId
+                    && newer.Type == reading.Type
+                    && newer.PolledAt > reading.PolledAt))
+            .OrderBy(reading => reading.Type);
 }
