@@ -1,21 +1,16 @@
+using HotChocolate.Data;
 using Microsoft.EntityFrameworkCore;
 using WeakCollector.Data;
-using Location = WeakCollector.Data.Location;
 
 namespace WeakCollector.GraphQL.Api.Queries;
 
 public sealed class Query
 {
-    public IQueryable<Location> GetLocations(WeakCollectorDbContext db) =>
-        db.Locations.AsNoTracking().OrderBy(location => location.Name);
-
     [UseProjection]
-    public IQueryable<MeterReading> GetLatestMeterReadings(WeakCollectorDbContext db, long locationId) =>
+    public IQueryable<MeterReading> GetLatestMeterReadings(WeakCollectorDbContext db) =>
         db.MeterReadings
             .AsNoTracking()
-            .Where(reading => reading.LocationId == locationId
-                && !db.MeterReadings.Any(newer => newer.LocationId == locationId
-                    && newer.Type == reading.Type
-                    && newer.PolledAt > reading.PolledAt))
-            .OrderBy(reading => reading.Type);
+            .Where(reading => reading.PolledAt == db.MeterReadings.Max(r => (DateTimeOffset?)r.PolledAt))
+            .OrderBy(reading => reading.Location)
+            .ThenBy(reading => reading.Type);
 }

@@ -17,22 +17,12 @@ internal sealed class MetersPolledConsumer(WeakCollectorDbContext db, ILogger<Me
             return;
         }
 
-        var names = message.Meters.Select(meter => meter.Location).Distinct().ToList();
-        var locations = await db.Locations
-            .Where(location => names.Contains(location.Name))
-            .ToDictionaryAsync(location => location.Name, context.CancellationToken);
-
-        foreach (var name in names.Where(name => !locations.ContainsKey(name)))
-        {
-            locations[name] = new Location { Name = name };
-        }
-
         db.MeterReadings.AddRange(message.Meters.Select(meter => new MeterReading
         {
             PollId = message.PollId,
             PolledAt = message.PolledAt,
             Type = meter.Type,
-            Location = locations[meter.Location],
+            Location = meter.Location,
             Measurements = PayloadMeasurements.Read(meter.Payload),
         }));
 

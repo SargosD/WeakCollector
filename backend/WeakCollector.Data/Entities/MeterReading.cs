@@ -10,9 +10,7 @@ public sealed class MeterReading
 
     public required string Type { get; init; }
 
-    public long LocationId { get; init; }
-
-    public required Location Location { get; init; }
+    public required string Location { get; init; }
 
     public List<Measurement> Measurements { get; init; } = [];
 }

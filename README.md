@@ -19,8 +19,7 @@ The API fails many calls (500, 502, 504, 429, dropped connections). The ingestor
 
 | Table | Holds |
 | --- | --- |
-| `locations` | Room name, unique. |
-| `meter_readings` | One meter at one poll: type, location, poll time. |
+| `meter_readings` | One meter at one poll: type, location name, poll time. |
 | `measurements` | One payload field: name, text value, value type. |
 
 The schema does not depend on WeakApp field names, so new fields need no migration.

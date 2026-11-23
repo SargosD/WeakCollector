@@ -11,4 +11,6 @@ public sealed class Measurement
     public required string Value { get; init; }
 
     public required MeasurementValueType ValueType { get; init; }
+
+    public MeterReading MeterReading { get; init; } = null!;
 }

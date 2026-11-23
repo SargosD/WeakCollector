@@ -20,7 +20,7 @@ public class MetersPolledConsumerTests(PostgresFixture postgres) : IClassFixture
         await PublishAndWaitAsync(services, poll);
 
         var readings = await ReadingsOfAsync(poll.PollId);
-        readings.Select(r => (r.Type, r.Location.Name)).ShouldBe([("air_quality", "Garage"), ("energy", "Bedroom")]);
+        readings.Select(r => (r.Type, r.Location)).ShouldBe([("air_quality", "Garage"), ("energy", "Bedroom")]);
         readings.ShouldAllBe(r => r.PolledAt == poll.PolledAt);
     }
 
@@ -61,23 +61,6 @@ public class MetersPolledConsumerTests(PostgresFixture postgres) : IClassFixture
             ignoreOrder: true);
     }
 
-    [Fact]
-    public async Task Consume_reuses_an_existing_location()
-    {
-        await using (var first = await ProcessorServices.StartAsync(postgres.ConnectionString))
-        {
-            await PublishAndWaitAsync(first, SamplePolls.TwoMeters());
-        }
-
-        await using (var second = await ProcessorServices.StartAsync(postgres.ConnectionString))
-        {
-            await PublishAndWaitAsync(second, SamplePolls.TwoMeters());
-        }
-
-        await using var db = postgres.CreateDbContext();
-        (await db.Locations.CountAsync(l => l.Name == "Garage", TestContext.Current.CancellationToken)).ShouldBe(1);
-    }
-
     private static async Task PublishAndWaitAsync(IServiceProvider services, MetersPolled poll)
     {
         var harness = services.GetRequiredService<ITestHarness>();
@@ -94,7 +77,6 @@ public class MetersPolledConsumerTests(PostgresFixture postgres) : IClassFixture
     {
         await using var db = postgres.CreateDbContext();
         return await db.MeterReadings
-            .Include(r => r.Location)
             .Include(r => r.Measurements)
             .Where(r => r.PollId == pollId)
             .OrderBy(r => r.Type)

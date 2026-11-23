@@ -22,30 +22,6 @@ namespace WeakCollector.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("WeakCollector.Data.Location", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id")
-                        .HasName("pk_locations");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasDatabaseName("ix_locations_name");
-
-                    b.ToTable("locations", (string)null);
-                });
-
             modelBuilder.Entity("WeakCollector.Data.Measurement", b =>
                 {
                     b.Property<long>("Id")
@@ -92,9 +68,10 @@ namespace WeakCollector.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("LocationId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("location_id");
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("location");
 
                     b.Property<Guid>("PollId")
                         .HasColumnType("uuid")
@@ -112,42 +89,29 @@ namespace WeakCollector.Data.Migrations
                     b.HasKey("Id")
                         .HasName("pk_meter_readings");
 
-                    b.HasIndex("LocationId")
-                        .HasDatabaseName("ix_meter_readings_location_id");
-
                     b.HasIndex("PollId")
                         .HasDatabaseName("ix_meter_readings_poll_id");
 
                     b.HasIndex("PolledAt")
                         .HasDatabaseName("ix_meter_readings_polled_at");
 
-                    b.HasIndex("Type", "LocationId", "PolledAt")
+                    b.HasIndex("Type", "Location", "PolledAt")
                         .IsDescending(false, false, true)
-                        .HasDatabaseName("ix_meter_readings_type_location_id_polled_at");
+                        .HasDatabaseName("ix_meter_readings_type_location_polled_at");
 
                     b.ToTable("meter_readings", (string)null);
                 });
 
             modelBuilder.Entity("WeakCollector.Data.Measurement", b =>
                 {
-                    b.HasOne("WeakCollector.Data.MeterReading", null)
+                    b.HasOne("WeakCollector.Data.MeterReading", "MeterReading")
                         .WithMany("Measurements")
                         .HasForeignKey("MeterReadingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_measurements_meter_readings_meter_reading_id");
-                });
 
-            modelBuilder.Entity("WeakCollector.Data.MeterReading", b =>
-                {
-                    b.HasOne("WeakCollector.Data.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_meter_readings_locations_location_id");
-
-                    b.Navigation("Location");
+                    b.Navigation("MeterReading");
                 });
 
             modelBuilder.Entity("WeakCollector.Data.MeterReading", b =>

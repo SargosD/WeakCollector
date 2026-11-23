@@ -10,56 +10,50 @@ public class LatestMeterReadingsTests(PostgresFixture postgres) : IClassFixture<
     private static readonly DateTimeOffset Start = new(2026, 11, 20, 12, 0, 0, TimeSpan.Zero);
 
     [Fact]
-    public async Task GetLatestMeterReadings_ManyPolls_ReturnsNewestReadingPerType()
+    public async Task GetLatestMeterReadings_ReturnsReadingsFromTheNewestPollOnly()
     {
         await using var db = postgres.CreateDbContext();
-        var location = await AddLocationAsync(db);
-        await AddReadingAsync(db, location, "energy", Start);
-        var newestEnergy = await AddReadingAsync(db, location, "energy", Start.AddMinutes(2));
-        await AddReadingAsync(db, location, "energy", Start.AddMinutes(1));
-        var newestMotion = await AddReadingAsync(db, location, "motion", Start.AddMinutes(1));
-        await AddReadingAsync(db, location, "motion", Start);
+        await AddReadingAsync(db, "Kitchen", "energy", Start);
+        await AddReadingAsync(db, "Hall", "motion", Start.AddMinutes(2));
+        var newestEnergy = await AddReadingAsync(db, "Bedroom", "energy", Start.AddMinutes(3));
+        var newestAir = await AddReadingAsync(db, "Garage", "air_quality", Start.AddMinutes(3));
 
-        var readings = await new Query().GetLatestMeterReadings(db, location.Id).ToListAsync(TestContext.Current.CancellationToken);
+        var readings = await new Query()
+            .GetLatestMeterReadings(db)
+            .ToListAsync(TestContext.Current.CancellationToken);
 
-        readings.Select(r => r.Id).ShouldBe([newestEnergy.Id, newestMotion.Id]);
+        readings.Select(r => r.Id).ShouldBe([newestEnergy.Id, newestAir.Id]);
     }
 
     [Fact]
-    public async Task GetLatestMeterReadings_OtherLocationHasNewerReading_IgnoresIt()
+    public async Task GetLatestMeterReadings_ReturnsTheLocationName()
     {
         await using var db = postgres.CreateDbContext();
-        var location = await AddLocationAsync(db);
-        var other = await AddLocationAsync(db);
-        var mine = await AddReadingAsync(db, location, "energy", Start);
-        await AddReadingAsync(db, other, "energy", Start.AddMinutes(5));
+        await AddReadingAsync(db, "Kitchen", "energy", Start);
 
-        var readings = await new Query().GetLatestMeterReadings(db, location.Id).ToListAsync(TestContext.Current.CancellationToken);
+        var readings = await new Query()
+            .GetLatestMeterReadings(db)
+            .ToListAsync(TestContext.Current.CancellationToken);
 
-        readings.Select(r => r.Id).ShouldBe([mine.Id]);
+        readings.ShouldHaveSingleItem().Location.ShouldBe("Kitchen");
     }
 
     [Fact]
-    public async Task GetLatestMeterReadings_UnknownLocation_ReturnsNothing()
+    public async Task GetLatestMeterReadings_NoReadings_ReturnsNothing()
     {
         await using var db = postgres.CreateDbContext();
+        await db.MeterReadings.ExecuteDeleteAsync(TestContext.Current.CancellationToken);
 
-        var readings = await new Query().GetLatestMeterReadings(db, long.MaxValue).ToListAsync(TestContext.Current.CancellationToken);
+        var readings = await new Query()
+            .GetLatestMeterReadings(db)
+            .ToListAsync(TestContext.Current.CancellationToken);
 
         readings.ShouldBeEmpty();
     }
 
-    private static async Task<Location> AddLocationAsync(WeakCollectorDbContext db)
-    {
-        var location = new Location { Name = $"Room {Guid.NewGuid()}" };
-        db.Locations.Add(location);
-        await db.SaveChangesAsync();
-        return location;
-    }
-
     private static async Task<MeterReading> AddReadingAsync(
         WeakCollectorDbContext db,
-        Location location,
+        string location,
         string type,
         DateTimeOffset polledAt)
     {
