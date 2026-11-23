@@ -22,7 +22,7 @@ export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   let graphqlProxy: Record<string, ProxyOptions> | undefined
 
-  if (command === 'serve') {
+  if (command === 'serve' && mode !== 'test') {
     if (!env.GRAPHQL_URL) {
       throw new Error('GRAPHQL_URL is required for the dev server')
     }
