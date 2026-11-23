@@ -25,8 +25,6 @@ try
         .AddGraphQLServer()
         .RegisterDbContextFactory<WeakCollectorDbContext>()
         .AddQueryType<Query>()
-        .AddFiltering()
-        .AddSorting()
         .AddProjections()
         .DisableIntrospection(!builder.Environment.IsDevelopment());
 

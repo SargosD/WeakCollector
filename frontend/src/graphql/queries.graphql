@@ -4,3 +4,17 @@ query Locations {
     name
   }
 }
+
+query LatestReadings($locationId: Long!) {
+  latestMeterReadings(locationId: $locationId) {
+    id
+    polledAt
+    type
+    measurements {
+      id
+      name
+      value
+      valueType
+    }
+  }
+}

@@ -12,9 +12,10 @@ const config: CodegenConfig = {
   documents: 'src/**/*.graphql',
   generates: {
     'src/types/graphql.ts': {
-      plugins: ['typescript', 'typescript-operations', 'typed-document-node'],
+      plugins: ['typescript-operations', 'typed-document-node'],
       config: {
         useTypeImports: true,
+        enumType: 'native',
         scalars: {
           Long: 'number',
           DateTime: 'string',
