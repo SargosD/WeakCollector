@@ -61,6 +61,51 @@ public class MetersPolledConsumerTests(PostgresFixture postgres) : IClassFixture
             ignoreOrder: true);
     }
 
+    [Fact]
+    public async Task Consume_publishes_the_stored_readings()
+    {
+        await using var services = await ProcessorServices.StartAsync(postgres.ConnectionString);
+        var poll = SamplePolls.TwoMeters();
+
+        await PublishAndWaitAsync(services, poll);
+
+        var harness = services.GetRequiredService<ITestHarness>();
+        var cancellationToken = TestContext.Current.CancellationToken;
+        (await harness.Published.Any<PollStored>(m => m.Context.Message.PollId == poll.PollId, cancellationToken))
+            .ShouldBeTrue();
+        var stored = harness.Published
+            .Select<PollStored>(m => m.Context.Message.PollId == poll.PollId, cancellationToken)
+            .Single()
+            .Context.Message;
+        var readings = await ReadingsOfAsync(poll.PollId);
+
+        stored.PolledAt.ShouldBe(poll.PolledAt);
+        stored.Readings.Select(r => (r.Id, r.Location, r.Type)).ShouldBe(
+            readings.Select(r => (r.Id, r.Location, r.Type)),
+            ignoreOrder: true);
+        stored.Readings.Single(r => r.Type == "air_quality").Measurements
+            .Select(m => (m.Name, m.Value, m.ValueType))
+            .ShouldBe([("co2", "330", "NUMBER"), ("pm25", "22", "NUMBER"), ("humidity", "32", "NUMBER")], ignoreOrder: true);
+    }
+
+    [Fact]
+    public async Task Consume_does_not_publish_for_a_poll_that_is_already_saved()
+    {
+        var poll = SamplePolls.TwoMeters();
+
+        await using (var first = await ProcessorServices.StartAsync(postgres.ConnectionString))
+        {
+            await PublishAndWaitAsync(first, poll);
+        }
+
+        await using var second = await ProcessorServices.StartAsync(postgres.ConnectionString);
+        await PublishAndWaitAsync(second, poll);
+
+        second.GetRequiredService<ITestHarness>()
+            .Published.Select<PollStored>(TestContext.Current.CancellationToken)
+            .ShouldBeEmpty();
+    }
+
     private static async Task PublishAndWaitAsync(IServiceProvider services, MetersPolled poll)
     {
         var harness = services.GetRequiredService<ITestHarness>();

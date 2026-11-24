@@ -1,0 +1,41 @@
+name: notifier
+
+on:
+  push:
+    branches: [main]
+    paths: &paths
+      - "backend/*"
+      - "backend/WeakCollector.Notifier*/**"
+      - "backend/WeakCollector.Messaging/**"
+      - ".github/workflows/notifier.yml"
+  pull_request:
+    paths: *paths
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+
+      - name: Restore
+        run: dotnet restore WeakCollector.Notifier.Tests/WeakCollector.Notifier.Tests.csproj
+
+      - name: Lint
+        run: dotnet format WeakCollector.Notifier.Tests/WeakCollector.Notifier.Tests.csproj --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build WeakCollector.Notifier.Tests/WeakCollector.Notifier.Tests.csproj --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --project WeakCollector.Notifier.Tests/WeakCollector.Notifier.Tests.csproj --configuration Release --no-build
+
+      - name: Docker build
+        run: docker build --file WeakCollector.Notifier/Dockerfile --tag weakcollector-notifier:${{ github.sha }} .

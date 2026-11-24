@@ -6,6 +6,7 @@
   <Project Path="WeakCollector.Ingestor.Tests/WeakCollector.Ingestor.Tests.csproj" />
   <Project Path="WeakCollector.Messaging/WeakCollector.Messaging.csproj" />
   <Project Path="WeakCollector.Notifier/WeakCollector.Notifier.csproj" />
+  <Project Path="WeakCollector.Notifier.Tests/WeakCollector.Notifier.Tests.csproj" />
   <Project Path="WeakCollector.Processor/WeakCollector.Processor.csproj" />
   <Project Path="WeakCollector.Processor.Tests/WeakCollector.Processor.Tests.csproj" />
 </Solution>
