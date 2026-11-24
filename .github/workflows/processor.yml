@@ -1,0 +1,42 @@
+name: processor
+
+on:
+  push:
+    branches: [main]
+    paths: &paths
+      - "backend/*"
+      - "backend/WeakCollector.Processor*/**"
+      - "backend/WeakCollector.Data/**"
+      - "backend/WeakCollector.Messaging/**"
+      - ".github/workflows/processor.yml"
+  pull_request:
+    paths: *paths
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+
+      - name: Restore
+        run: dotnet restore WeakCollector.Processor.Tests/WeakCollector.Processor.Tests.csproj
+
+      - name: Lint
+        run: dotnet format WeakCollector.Processor.Tests/WeakCollector.Processor.Tests.csproj --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build WeakCollector.Processor.Tests/WeakCollector.Processor.Tests.csproj --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --project WeakCollector.Processor.Tests/WeakCollector.Processor.Tests.csproj --configuration Release --no-build
+
+      - name: Docker build
+        run: docker build --file WeakCollector.Processor/Dockerfile --tag weakcollector-processor:${{ github.sha }} .
