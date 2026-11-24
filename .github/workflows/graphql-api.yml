@@ -1,0 +1,41 @@
+name: graphql-api
+
+on:
+  push:
+    branches: [main]
+    paths: &paths
+      - "backend/*"
+      - "backend/WeakCollector.GraphQL.Api*/**"
+      - "backend/WeakCollector.Data/**"
+      - ".github/workflows/graphql-api.yml"
+  pull_request:
+    paths: *paths
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+
+      - name: Restore
+        run: dotnet restore WeakCollector.GraphQL.Api.Tests/WeakCollector.GraphQL.Api.Tests.csproj
+
+      - name: Lint
+        run: dotnet format WeakCollector.GraphQL.Api.Tests/WeakCollector.GraphQL.Api.Tests.csproj --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build WeakCollector.GraphQL.Api.Tests/WeakCollector.GraphQL.Api.Tests.csproj --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --project WeakCollector.GraphQL.Api.Tests/WeakCollector.GraphQL.Api.Tests.csproj --configuration Release --no-build
+
+      - name: Docker build
+        run: docker build --file WeakCollector.GraphQL.Api/Dockerfile --tag weakcollector-graphql-api:${{ github.sha }} .

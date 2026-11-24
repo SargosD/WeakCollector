@@ -4,9 +4,9 @@ namespace WeakCollector.Data;
 
 public sealed class WeakCollectorDbContext(DbContextOptions<WeakCollectorDbContext> options) : DbContext(options)
 {
-    public DbSet<MeterReading> MeterReadings { get; set; }
+    public DbSet<MeterReading> MeterReadings => Set<MeterReading>();
 
-    public DbSet<Measurement> Measurements { get; set; }
+    public DbSet<Measurement> Measurements => Set<Measurement>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

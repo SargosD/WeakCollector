@@ -1,16 +1,35 @@
 using HotChocolate.Data;
-using Microsoft.EntityFrameworkCore;
 using WeakCollector.Data;
+using WeakCollector.GraphQL.Api.Models;
+using WeakCollector.GraphQL.Api.Services;
 
 namespace WeakCollector.GraphQL.Api.Queries;
 
 public sealed class Query
 {
+    [UsePaging(IncludeTotalCount = true, MaxPageSize = 50)]
     [UseProjection]
-    public IQueryable<MeterReading> GetLatestMeterReadings(WeakCollectorDbContext db) =>
-        db.MeterReadings
-            .AsNoTracking()
-            .Where(reading => reading.PolledAt == db.MeterReadings.Max(r => (DateTimeOffset?)r.PolledAt))
-            .OrderBy(reading => reading.Location)
-            .ThenBy(reading => reading.Type);
+    [UseFiltering]
+    [UseSorting]
+    public IQueryable<MeterReading> GetAllReadings(MeterReadingService meterReadings) =>
+        meterReadings.GetAll();
+
+    [UseProjection]
+    public IQueryable<MeterReading> GetLatestMeterReadings(MeterReadingService meterReadings) =>
+        meterReadings.GetLatest();
+
+    public Task<IReadOnlyList<MetricInfo>> GetMetrics(
+        TimeRange range,
+        MeterReadingService meterReadings,
+        CancellationToken cancellationToken) =>
+        meterReadings.GetMetricsAsync(range, cancellationToken);
+
+    public Task<IReadOnlyList<TrendPoint>> GetMeasurementTrend(
+        string type,
+        string name,
+        TimeRange range,
+        AggregateFunction aggregate,
+        MeterReadingService meterReadings,
+        CancellationToken cancellationToken) =>
+        meterReadings.GetMeasurementTrendAsync(type, name, range, aggregate, cancellationToken);
 }

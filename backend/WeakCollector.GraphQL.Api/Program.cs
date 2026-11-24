@@ -2,6 +2,7 @@ using Serilog;
 using Serilog.Formatting.Compact;
 using WeakCollector.Data;
 using WeakCollector.GraphQL.Api.Queries;
+using WeakCollector.GraphQL.Api.Services;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(new CompactJsonFormatter())
@@ -18,6 +19,7 @@ try
         .Enrich.WithProperty("Service", "graphql-api")
         .WriteTo.Console(new CompactJsonFormatter()));
 
+    builder.Services.AddScoped<MeterReadingService>();
     builder.Services.AddHealthChecks();
     builder.Services.AddWeakCollectorDatabase(builder.Configuration);
 
@@ -26,6 +28,8 @@ try
         .RegisterDbContextFactory<WeakCollectorDbContext>()
         .AddQueryType<Query>()
         .AddProjections()
+        .AddFiltering()
+        .AddSorting()
         .DisableIntrospection(!builder.Environment.IsDevelopment());
 
     var app = builder.Build();

@@ -4,7 +4,7 @@ using WeakCollector.Data;
 
 namespace WeakCollector.GraphQL.Api.Tests.Support;
 
-public sealed class PostgresFixture : IAsyncLifetime
+public sealed class PostgresFixture : IAsyncLifetime, IDbContextFactory<WeakCollectorDbContext>
 {
     private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:17-alpine").Build();
 
