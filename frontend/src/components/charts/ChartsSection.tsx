@@ -11,6 +11,7 @@ import {
 import { AggregateSelect } from './AggregateSelect'
 import { MetricSelect } from './MetricSelect'
 import { RangeSelect } from './RangeSelect'
+import { StateTimeline } from './StateTimeline'
 import { TrendChart } from './TrendChart'
 import { metricOptions } from './utils/metricOptions'
 
@@ -63,9 +64,7 @@ export function ChartsSection() {
             {metric.valueType === MeasurementValueType.Number ? (
               <TrendChart metric={metric} range={range} aggregate={aggregate} />
             ) : (
-              <p className="text-sm text-muted-foreground">
-                The timeline for on/off metrics is not available yet.
-              </p>
+              <StateTimeline metric={metric} range={range} />
             )}
           </>
         )}

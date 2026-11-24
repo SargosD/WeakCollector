@@ -4,22 +4,9 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
 import { useQuery } from 'urql'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Spinner } from '@/components/ui/spinner'
-import { type AggregateFunction, MeasurementTrendDocument, TimeRange } from '@/types/graphql'
+import { type AggregateFunction, MeasurementTrendDocument, type TimeRange } from '@/types/graphql'
 import type { Metric } from './utils/metricOptions'
-
-const TickFormats: Record<TimeRange, Intl.DateTimeFormatOptions> = {
-  [TimeRange.LastHour]: { hour: '2-digit', minute: '2-digit' },
-  [TimeRange.LastDay]: { hour: '2-digit', minute: '2-digit' },
-  [TimeRange.LastWeek]: { day: '2-digit', month: 'short', hour: '2-digit' },
-  [TimeRange.LastMonth]: { day: '2-digit', month: 'short' },
-}
-
-const TooltipFormat: Intl.DateTimeFormatOptions = {
-  day: '2-digit',
-  month: 'short',
-  hour: '2-digit',
-  minute: '2-digit',
-}
+import { TickFormats, TooltipFormat } from './utils/timeFormats'
 
 type TrendChartProps = {
   metric: Metric
