@@ -24,7 +24,11 @@ const motion: Metric = {
 function renderChart(metric: Metric) {
   render(
     <Provider value={createClient({ url: '/graphql', exchanges: [cacheExchange, fetchExchange] })}>
-      <AggregationChart metric={metric} range={TimeRange.LastDay} aggregate={AggregateFunction.Min} />
+      <AggregationChart
+        metric={metric}
+        range={TimeRange.LastDay}
+        aggregate={AggregateFunction.Min}
+      />
     </Provider>,
   )
 }

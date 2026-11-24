@@ -63,7 +63,11 @@ export function TrendChart({ metric, range, aggregate }: TrendChartProps) {
 
   return (
     <figure aria-label={`${metric.label} trend`} className="flex w-full flex-col gap-3">
-      <div role="group" aria-label="Locations" className="order-last flex flex-wrap gap-x-4 gap-y-2">
+      <div
+        role="group"
+        aria-label="Locations"
+        className="order-last flex flex-wrap gap-x-4 gap-y-2"
+      >
         {lines.map(([location], index) => (
           <button
             key={location}
