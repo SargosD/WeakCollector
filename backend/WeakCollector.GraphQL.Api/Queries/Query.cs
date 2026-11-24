@@ -32,4 +32,13 @@ public sealed class Query
         MeterReadingService meterReadings,
         CancellationToken cancellationToken) =>
         meterReadings.GetMeasurementTrendAsync(type, name, range, aggregate, cancellationToken);
+
+    public Task<IReadOnlyList<Aggregation>> GetAggregation(
+        string type,
+        string name,
+        TimeRange range,
+        AggregateFunction aggregate,
+        MeterReadingService meterReadings,
+        CancellationToken cancellationToken) =>
+        meterReadings.GetAggregationAsync(type, name, range, aggregate, cancellationToken);
 }

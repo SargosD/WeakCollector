@@ -225,6 +225,53 @@ public sealed class MeterReadingServiceTests(PostgresFixture postgres) : IClassF
         metrics.ShouldHaveSingleItem().Name.ShouldBe("co2");
     }
 
+    [Theory]
+    [InlineData(AggregateFunction.Avg, 510)]
+    [InlineData(AggregateFunction.Min, 500)]
+    [InlineData(AggregateFunction.Max, 520)]
+    public async Task GetAggregationAsync_AppliesTheRequestedFunctionPerLocation(
+        AggregateFunction aggregate,
+        double expectedKitchen)
+    {
+        var minute = PreviousSlotStart(TimeSpan.FromMinutes(1));
+        await using var db = await CreateEmptyDbContextAsync();
+        await AddReadingAsync(db, "Kitchen", "air_quality", minute.AddMinutes(-1), Number("co2", "500"));
+        await AddReadingAsync(db, "Kitchen", "air_quality", minute, Number("co2", "520"));
+        await AddReadingAsync(db, "Garage", "air_quality", minute, Number("co2", "300"));
+
+        var aggregation = await GetAggregationAsync("air_quality", "co2", TimeRange.LastHour, aggregate);
+
+        aggregation.ShouldBe([new Aggregation("Garage", 300), new Aggregation("Kitchen", expectedKitchen)]);
+    }
+
+    [Fact]
+    public async Task GetAggregationAsync_LeavesOutReadingsOutsideTheRange()
+    {
+        var minute = PreviousSlotStart(TimeSpan.FromMinutes(1));
+        await using var db = await CreateEmptyDbContextAsync();
+        await AddReadingAsync(db, "Kitchen", "air_quality", minute.AddMinutes(-61), Number("co2", "900"));
+        await AddReadingAsync(db, "Kitchen", "air_quality", minute, Number("co2", "500"));
+
+        var aggregation = await GetAggregationAsync("air_quality", "co2", TimeRange.LastHour, AggregateFunction.Max);
+
+        aggregation.ShouldHaveSingleItem().Value.ShouldBe(500);
+    }
+
+    [Fact]
+    public async Task GetAggregationAsync_ReturnsTheShareOfTrueForBooleans()
+    {
+        var minute = PreviousSlotStart(TimeSpan.FromMinutes(1));
+        await using var db = await CreateEmptyDbContextAsync();
+        await AddReadingAsync(db, "Hall", "motion", minute.AddMinutes(-3), Boolean("motionDetected", "true"));
+        await AddReadingAsync(db, "Hall", "motion", minute.AddMinutes(-2), Boolean("motionDetected", "false"));
+        await AddReadingAsync(db, "Hall", "motion", minute.AddMinutes(-1), Boolean("motionDetected", "true"));
+        await AddReadingAsync(db, "Hall", "motion", minute, Boolean("motionDetected", "true"));
+
+        var aggregation = await GetAggregationAsync("motion", "motionDetected", TimeRange.LastHour, AggregateFunction.Avg);
+
+        aggregation.ShouldHaveSingleItem().Value.ShouldBe(0.75);
+    }
+
     private static DateTimeOffset PreviousSlotStart(TimeSpan slot)
     {
         var now = DateTimeOffset.UtcNow;
@@ -266,6 +313,13 @@ public sealed class MeterReadingServiceTests(PostgresFixture postgres) : IClassF
         TimeRange range,
         AggregateFunction aggregate = AggregateFunction.Avg) =>
         _service.GetMeasurementTrendAsync(type, name, range, aggregate, TestContext.Current.CancellationToken);
+
+    private Task<IReadOnlyList<Aggregation>> GetAggregationAsync(
+        string type,
+        string name,
+        TimeRange range,
+        AggregateFunction aggregate) =>
+        _service.GetAggregationAsync(type, name, range, aggregate, TestContext.Current.CancellationToken);
 
     private async Task<WeakCollectorDbContext> CreateEmptyDbContextAsync()
     {

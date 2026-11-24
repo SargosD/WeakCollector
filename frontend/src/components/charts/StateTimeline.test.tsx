@@ -34,7 +34,7 @@ describe('StateTimeline', () => {
     vi.stubGlobal('fetch', vi.fn())
   })
 
-  it('shows each location with one cell per slot, on, off or without data', async () => {
+  it('shows each location with one cell per slot, true, false or without data', async () => {
     mockResponse({
       data: {
         measurementTrend: [
@@ -52,8 +52,8 @@ describe('StateTimeline', () => {
         .getAllByTitle(new RegExp(`^${location} · `))
         .map((cell) => cell.title.split(' · ').at(-1))
 
-    expect(cells('Garage')).toEqual(['Off', 'No data'])
-    expect(cells('Kitchen')).toEqual(['On', 'Off'])
+    expect(cells('Garage')).toEqual(['False', 'No data'])
+    expect(cells('Kitchen')).toEqual(['True', 'False'])
   })
 
   it('requests whether the metric was on in each slot', async () => {

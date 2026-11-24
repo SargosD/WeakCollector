@@ -78,5 +78,42 @@ public sealed class MeterReadingService(IDbContextFactory<WeakCollectorDbContext
             .ToList();
     }
 
+    public async Task<IReadOnlyList<Aggregation>> GetAggregationAsync(
+        string type,
+        string name,
+        TimeRange range,
+        AggregateFunction aggregate,
+        CancellationToken cancellationToken)
+    {
+        var (from, _) = range.Window();
+
+        var grouped = _db.Measurements
+            .AsNoTracking()
+            .Where(m => m.MeterReading.Type == type
+                && m.Name == name
+                && m.ValueType != MeasurementValueType.Text
+                && m.MeterReading.PolledAt >= from)
+            .GroupBy(
+                m => m.MeterReading.Location,
+                m => m.ValueType == MeasurementValueType.Boolean
+                    ? (m.Value == "true" ? 1.0 : 0.0)
+                    : Convert.ToDouble(m.Value));
+
+        var aggregated = aggregate switch
+        {
+            AggregateFunction.Min => grouped.Select(g => new { Location = g.Key, Value = g.Min() }),
+            AggregateFunction.Max => grouped.Select(g => new { Location = g.Key, Value = g.Max() }),
+            _ => grouped.Select(g => new { Location = g.Key, Value = g.Average() }),
+        };
+
+        var locations = await aggregated
+            .OrderBy(a => a.Location)
+            .ToListAsync(cancellationToken);
+
+        return locations
+            .Select(a => new Aggregation(a.Location, a.Value))
+            .ToList();
+    }
+
     public void Dispose() => _db.Dispose();
 }
