@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { Provider, cacheExchange, createClient, fetchExchange } from 'urql'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { InitialPollUpdates, PollUpdatesContext } from '@/live/pollUpdates'
+import { LastPollContext } from '@/realtime/context/lastPollContext'
 import { AggregateFunction, MeasurementValueType, TimeRange } from '@/types/graphql'
 import { TrendChart } from './TrendChart'
 
@@ -93,18 +93,15 @@ describe('TrendChart', () => {
     const client = createClient({ url: '/graphql', exchanges: [cacheExchange, fetchExchange] })
     const chart = (polledAt: string | null) => (
       <Provider value={client}>
-        <PollUpdatesContext.Provider
-          value={{
-            ...InitialPollUpdates,
-            lastPoll: polledAt ? { pollId: 'poll', polledAt, readings: [] } : null,
-          }}
+        <LastPollContext.Provider
+          value={polledAt ? { pollId: 'poll', polledAt, readings: [] } : null}
         >
           <TrendChart
             metric={metric}
             range={TimeRange.LastHour}
             aggregate={AggregateFunction.Max}
           />
-        </PollUpdatesContext.Provider>
+        </LastPollContext.Provider>
       </Provider>
     )
     const { rerender } = render(chart(null))

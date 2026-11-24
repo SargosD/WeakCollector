@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { MeasurementValueType } from '@/types/graphql'
-import { metricOptions } from './metricOptions'
+import { formatMetrics } from './formatMetrics'
 
-describe('metricOptions', () => {
+describe('formatMetrics', () => {
   it('labels known metrics with their type, name and unit', () => {
-    const options = metricOptions([
+    const options = formatMetrics([
       { type: 'air_quality', name: 'co2', valueType: MeasurementValueType.Number },
     ])
 
@@ -20,7 +20,7 @@ describe('metricOptions', () => {
   })
 
   it('labels a metric without a unit by its type and name only', () => {
-    const options = metricOptions([
+    const options = formatMetrics([
       { type: 'motion', name: 'motionDetected', valueType: MeasurementValueType.Boolean },
     ])
 
@@ -28,7 +28,7 @@ describe('metricOptions', () => {
   })
 
   it('shows unknown metrics with their raw names', () => {
-    const options = metricOptions([
+    const options = formatMetrics([
       { type: 'water_leak', name: 'leak', valueType: MeasurementValueType.Boolean },
     ])
 
@@ -36,7 +36,7 @@ describe('metricOptions', () => {
   })
 
   it('sorts metrics by label', () => {
-    const options = metricOptions([
+    const options = formatMetrics([
       { type: 'energy', name: 'energy', valueType: MeasurementValueType.Number },
       { type: 'air_quality', name: 'pm25', valueType: MeasurementValueType.Number },
       { type: 'air_quality', name: 'co2', valueType: MeasurementValueType.Number },

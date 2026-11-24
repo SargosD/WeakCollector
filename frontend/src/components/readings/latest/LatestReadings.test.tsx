@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { Provider, cacheExchange, createClient, fetchExchange } from 'urql'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { InitialPollUpdates, PollUpdatesContext } from '@/live/pollUpdates'
+import { LastPollContext } from '@/realtime/context/lastPollContext'
 import { MeasurementValueType } from '@/types/graphql'
 import { LatestReadings } from './LatestReadings'
 
@@ -11,21 +11,21 @@ const readings = [
     location: 'Kitchen',
     polledAt: '2026-11-20T12:00:00Z',
     type: 'energy',
-    measurements: [{ id: 1, name: 'energy', value: '263.09', valueType: 'NUMBER' }],
+    measurements: [{ name: 'energy', value: '263.09', valueType: 'NUMBER' }],
   },
   {
     id: 2,
     location: 'Kitchen',
     polledAt: '2026-11-20T12:00:00Z',
     type: 'water_leak',
-    measurements: [{ id: 2, name: 'zone', value: 'basement', valueType: 'TEXT' }],
+    measurements: [{ name: 'zone', value: 'basement', valueType: 'TEXT' }],
   },
   {
     id: 3,
     location: 'Garage',
     polledAt: '2026-11-20T12:00:00Z',
     type: 'air_quality',
-    measurements: [{ id: 3, name: 'co2', value: '667', valueType: 'NUMBER' }],
+    measurements: [{ name: 'co2', value: '667', valueType: 'NUMBER' }],
   },
 ]
 
@@ -85,32 +85,28 @@ describe('LatestReadings', () => {
       <Provider
         value={createClient({ url: '/graphql', exchanges: [cacheExchange, fetchExchange] })}
       >
-        <PollUpdatesContext.Provider
+        <LastPollContext.Provider
           value={{
-            ...InitialPollUpdates,
-            lastPoll: {
-              pollId: 'poll',
-              polledAt: '2026-11-20T12:01:00Z',
-              readings: [
-                {
-                  id: 4,
-                  location: 'Office',
-                  type: 'energy',
-                  measurements: [
-                    {
-                      id: 4,
-                      name: 'energy',
-                      value: '418.67',
-                      valueType: MeasurementValueType.Number,
-                    },
-                  ],
-                },
-              ],
-            },
+            pollId: 'poll',
+            polledAt: '2026-11-20T12:01:00Z',
+            readings: [
+              {
+                id: 4,
+                location: 'Office',
+                type: 'energy',
+                measurements: [
+                  {
+                    name: 'energy',
+                    value: '418.67',
+                    valueType: MeasurementValueType.Number,
+                  },
+                ],
+              },
+            ],
           }}
         >
           <LatestReadings />
-        </PollUpdatesContext.Provider>
+        </LastPollContext.Provider>
       </Provider>,
     )
 

@@ -1,4 +1,4 @@
-import type { Reading } from '@/types/readings'
+import type { Reading } from '@/components/readings/types'
 
 export function groupReadingsByLocation(readings: Reading[]) {
   const groups = new Map<string, Reading[]>()

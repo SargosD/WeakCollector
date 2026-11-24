@@ -15,7 +15,7 @@ function metricLabel(type: string, name: string): string {
   return unit ? `${typeTitle} · ${label} (${unit})` : `${typeTitle} · ${label}`
 }
 
-export function metricOptions(metrics: MetricsQuery['metrics']): Metric[] {
+export function formatMetrics(metrics: MetricsQuery['metrics']): Metric[] {
   return metrics
     .map((metric) => ({
       key: `${metric.type}:${metric.name}:${metric.valueType}`,

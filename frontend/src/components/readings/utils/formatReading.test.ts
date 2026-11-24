@@ -1,15 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { MeasurementValueType } from '@/types/graphql'
-import type { Reading } from '@/types/readings'
+import type { Reading } from '@/components/readings/types'
 import { formatReading } from './formatReading'
 
 function measurement(
-  id: number,
   name: string,
   value: string,
   valueType: MeasurementValueType,
 ): Reading['measurements'][number] {
-  return { id, name, value, valueType }
+  return { name, value, valueType }
 }
 
 function reading(type: string, measurements: Reading['measurements']): Reading {
@@ -19,7 +18,7 @@ function reading(type: string, measurements: Reading['measurements']): Reading {
 describe('formatReading', () => {
   it('formats an energy reading', () => {
     const result = formatReading(
-      reading('energy', [measurement(1, 'energy', '263.09', MeasurementValueType.Number)]),
+      reading('energy', [measurement('energy', '263.09', MeasurementValueType.Number)]),
     )
 
     expect(result).toEqual({
@@ -31,9 +30,9 @@ describe('formatReading', () => {
   it('formats an air quality reading in the order of its fields', () => {
     const result = formatReading(
       reading('air_quality', [
-        measurement(3, 'humidity', '69', MeasurementValueType.Number),
-        measurement(1, 'co2', '667', MeasurementValueType.Number),
-        measurement(2, 'pm25', '9', MeasurementValueType.Number),
+        measurement('humidity', '69', MeasurementValueType.Number),
+        measurement('co2', '667', MeasurementValueType.Number),
+        measurement('pm25', '9', MeasurementValueType.Number),
       ]),
     )
 
@@ -52,7 +51,7 @@ describe('formatReading', () => {
     ['false', 'None'],
   ])('formats motion %s as %s', (value, expected) => {
     const result = formatReading(
-      reading('motion', [measurement(1, 'motionDetected', value, MeasurementValueType.Boolean)]),
+      reading('motion', [measurement('motionDetected', value, MeasurementValueType.Boolean)]),
     )
 
     expect(result.rows).toEqual([{ label: 'Motion', value: expected }])
@@ -60,7 +59,7 @@ describe('formatReading', () => {
 
   it('shows a dash for a known field that is missing', () => {
     const result = formatReading(
-      reading('air_quality', [measurement(1, 'co2', '667', MeasurementValueType.Number)]),
+      reading('air_quality', [measurement('co2', '667', MeasurementValueType.Number)]),
     )
 
     expect(result.rows).toEqual([
@@ -72,7 +71,7 @@ describe('formatReading', () => {
 
   it('shows the raw value when a known field changed its value type', () => {
     const result = formatReading(
-      reading('energy', [measurement(1, 'energy', 'n/a', MeasurementValueType.Text)]),
+      reading('energy', [measurement('energy', 'n/a', MeasurementValueType.Text)]),
     )
 
     expect(result.rows).toEqual([{ label: 'Energy', value: 'n/a' }])
@@ -81,8 +80,8 @@ describe('formatReading', () => {
   it('appends measurements a known type does not define', () => {
     const result = formatReading(
       reading('energy', [
-        measurement(1, 'energy', '10.50', MeasurementValueType.Number),
-        measurement(2, 'voltage', '230', MeasurementValueType.Number),
+        measurement('energy', '10.50', MeasurementValueType.Number),
+        measurement('voltage', '230', MeasurementValueType.Number),
       ]),
     )
 
@@ -95,8 +94,8 @@ describe('formatReading', () => {
   it('shows an unknown type with its name and raw measurements', () => {
     const result = formatReading(
       reading('water_leak', [
-        measurement(1, 'leak', 'true', MeasurementValueType.Boolean),
-        measurement(2, 'zone', 'basement', MeasurementValueType.Text),
+        measurement('leak', 'true', MeasurementValueType.Boolean),
+        measurement('zone', 'basement', MeasurementValueType.Text),
       ]),
     )
 

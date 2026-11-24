@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { Metric } from './utils/metricOptions'
+import type { Metric } from '@/components/charts/utils/formatMetrics'
 
 type MetricSelectProps = {
   metrics: Metric[]

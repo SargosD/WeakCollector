@@ -3,7 +3,7 @@ import { Provider, cacheExchange, createClient, fetchExchange } from 'urql'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AggregateFunction, MeasurementValueType, TimeRange } from '@/types/graphql'
 import { AggregationChart } from './AggregationChart'
-import type { Metric } from './utils/metricOptions'
+import type { Metric } from '@/components/charts/utils/formatMetrics'
 
 const co2: Metric = {
   key: 'air_quality:co2:NUMBER',

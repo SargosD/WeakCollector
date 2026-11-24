@@ -1,5 +1,10 @@
 import { MeasurementValueType } from '@/types/graphql'
-import type { FormattedReading, Measurement, Reading, ReadingRow } from '@/types/readings'
+import type {
+  FormattedReading,
+  Measurement,
+  Reading,
+  ReadingRow,
+} from '@/components/readings/types'
 
 type FieldSpec = {
   name: string
