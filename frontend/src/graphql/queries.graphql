@@ -12,3 +12,24 @@ query LatestReadings {
     }
   }
 }
+
+query Metrics($range: TimeRange!) {
+  metrics(range: $range) {
+    type
+    name
+    valueType
+  }
+}
+
+query MeasurementTrend(
+  $type: String!
+  $name: String!
+  $range: TimeRange!
+  $aggregate: AggregateFunction!
+) {
+  measurementTrend(type: $type, name: $name, range: $range, aggregate: $aggregate) {
+    location
+    polledAt
+    value
+  }
+}

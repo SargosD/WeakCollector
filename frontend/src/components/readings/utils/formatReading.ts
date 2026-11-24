@@ -47,6 +47,20 @@ function rawRow(measurement: Measurement): ReadingRow {
   return { label: measurement.name, value: measurement.value }
 }
 
+export function describeMeasurement(
+  type: string,
+  name: string,
+): { typeTitle: string; label: string; unit?: string } {
+  if (!Object.hasOwn(KnownTypes, type)) {
+    return { typeTitle: type, label: name }
+  }
+
+  const spec = KnownTypes[type]
+  const field = spec.fields.find((item) => item.name === name)
+
+  return { typeTitle: spec.title, label: field?.label ?? name, unit: field?.unit }
+}
+
 export function formatReading(reading: Reading): FormattedReading {
   if (!Object.hasOwn(KnownTypes, reading.type)) {
     return { title: reading.type, rows: reading.measurements.map(rawRow) }
