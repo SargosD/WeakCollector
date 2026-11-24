@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { vi } from 'vitest'
-import App from './App.tsx'
+import { App } from '@/App'
 
-vi.mock('./pages/DashboardPage', () => ({
+vi.mock('@/pages/DashboardPage', () => ({
   DashboardPage: () => <div>Dashboard page</div>,
 }))
 

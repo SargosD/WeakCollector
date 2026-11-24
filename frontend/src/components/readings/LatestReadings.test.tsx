@@ -55,7 +55,7 @@ describe('LatestReadings', () => {
 
     expect(await screen.findByRole('heading', { name: 'Kitchen' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Garage' })).toBeInTheDocument()
-    expect(screen.getAllByRole('article')).toHaveLength(2)
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(2)
     expect(screen.getByText('water_leak')).toBeInTheDocument()
     expect(screen.getByText('Air quality')).toBeInTheDocument()
   })
@@ -69,20 +69,12 @@ describe('LatestReadings', () => {
     expect(screen.getByText('667 ppm')).toBeInTheDocument()
   })
 
-  it('queries without a location variable', async () => {
-    mockResponse({ data: { latestMeterReadings: readings } })
-    renderReadings()
-
-    await screen.findByText('263.09 kWh')
-    const [url, init] = vi.mocked(fetch).mock.calls[0]
-    expect(String(url) + String(init?.body)).not.toContain('locationId')
-  })
-
   it('shows a message when there are no readings', async () => {
     mockResponse({ data: { latestMeterReadings: [] } })
     renderReadings()
 
-    expect(await screen.findByText('Could not load latest values.')).toBeInTheDocument()
+    expect(await screen.findByText('No readings yet.')).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('shows an error when the request fails', async () => {

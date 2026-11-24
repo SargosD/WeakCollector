@@ -1,7 +1,7 @@
-import { AppLayout } from './layouts/AppLayout'
-import { DashboardPage } from './pages/DashboardPage'
+import { AppLayout } from '@/layouts/AppLayout'
+import { DashboardPage } from '@/pages/DashboardPage'
 
-export default function App() {
+export function App() {
   return (
     <AppLayout>
       <DashboardPage />

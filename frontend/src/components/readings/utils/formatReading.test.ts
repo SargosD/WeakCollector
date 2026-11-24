@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { MeasurementValueType } from '../../../types/graphql'
-import type { Reading } from '../../../types/readings'
+import { MeasurementValueType } from '@/types/graphql'
+import type { Reading } from '@/types/readings'
 import { formatReading } from './formatReading'
 
 function measurement(

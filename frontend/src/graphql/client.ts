@@ -1,6 +1,6 @@
 import { cacheExchange, createClient, fetchExchange } from 'urql'
 
-export const GRAPHQL_ROUTE = '/graphql'
+const GRAPHQL_ROUTE = '/graphql'
 
 export function createGraphQLClient() {
   return createClient({
