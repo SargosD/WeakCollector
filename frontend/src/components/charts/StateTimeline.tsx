@@ -2,6 +2,7 @@ import { AlertCircleIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { useQuery } from 'urql'
 import { Spinner } from '@/components/ui/spinner'
+import { useRefetchOnPoll } from '@/live/pollUpdates'
 import { AggregateFunction, MeasurementTrendDocument, type TimeRange } from '@/types/graphql'
 import type { Metric } from './utils/metricOptions'
 import { TickFormats, TooltipFormat } from './utils/timeFormats'
@@ -12,10 +13,11 @@ type StateTimelineProps = {
 }
 
 export function StateTimeline({ metric, range }: StateTimelineProps) {
-  const [{ data, error, fetching }] = useQuery({
+  const [{ data, error, fetching }, reexecute] = useQuery({
     query: MeasurementTrendDocument,
     variables: { type: metric.type, name: metric.name, range, aggregate: AggregateFunction.Max },
   })
+  useRefetchOnPoll(reexecute)
 
   const { slots, rows } = useMemo(() => {
     const points = data?.measurementTrend ?? []

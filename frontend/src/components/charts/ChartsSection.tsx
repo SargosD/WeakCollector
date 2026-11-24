@@ -2,6 +2,7 @@ import { AlertCircleIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useQuery } from 'urql'
 import { Spinner } from '@/components/ui/spinner'
+import { useRefetchOnPoll } from '@/live/pollUpdates'
 import {
   AggregateFunction,
   MeasurementValueType,
@@ -20,7 +21,11 @@ export function ChartsSection() {
   const [range, setRange] = useState(TimeRange.LastDay)
   const [aggregate, setAggregate] = useState(AggregateFunction.Avg)
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
-  const [{ data, error, fetching }] = useQuery({ query: MetricsDocument, variables: { range } })
+  const [{ data, error, fetching }, reexecute] = useQuery({
+    query: MetricsDocument,
+    variables: { range },
+  })
+  useRefetchOnPoll(reexecute)
 
   const metrics = useMemo(() => metricOptions(data?.metrics ?? []), [data])
   const metric = metrics.find((item) => item.key === selectedKey) ?? metrics[0]

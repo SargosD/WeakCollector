@@ -4,6 +4,7 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
 import { useQuery } from 'urql'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Spinner } from '@/components/ui/spinner'
+import { useRefetchOnPoll } from '@/live/pollUpdates'
 import { type AggregateFunction, MeasurementTrendDocument, type TimeRange } from '@/types/graphql'
 import type { Metric } from './utils/metricOptions'
 import { TickFormats, TooltipFormat } from './utils/timeFormats'
@@ -15,10 +16,11 @@ type TrendChartProps = {
 }
 
 export function TrendChart({ metric, range, aggregate }: TrendChartProps) {
-  const [{ data, error, fetching }] = useQuery({
+  const [{ data, error, fetching }, reexecute] = useQuery({
     query: MeasurementTrendDocument,
     variables: { type: metric.type, name: metric.name, range, aggregate },
   })
+  useRefetchOnPoll(reexecute)
   const [hidden, setHidden] = useState<string[]>([])
 
   const lines = useMemo(() => {

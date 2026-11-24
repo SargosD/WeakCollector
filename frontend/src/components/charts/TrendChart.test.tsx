@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { Provider, cacheExchange, createClient, fetchExchange } from 'urql'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { InitialPollUpdates, PollUpdatesContext } from '@/live/pollUpdates'
 import { AggregateFunction, MeasurementValueType, TimeRange } from '@/types/graphql'
 import { TrendChart } from './TrendChart'
 
@@ -85,6 +86,33 @@ describe('TrendChart', () => {
       range: 'LAST_HOUR',
       aggregate: 'MAX',
     })
+  })
+
+  it('refetches when a new poll arrives', async () => {
+    mockResponse({ data: { measurementTrend: [] } })
+    const client = createClient({ url: '/graphql', exchanges: [cacheExchange, fetchExchange] })
+    const chart = (polledAt: string | null) => (
+      <Provider value={client}>
+        <PollUpdatesContext.Provider
+          value={{
+            ...InitialPollUpdates,
+            lastPoll: polledAt ? { pollId: 'poll', polledAt, readings: [] } : null,
+          }}
+        >
+          <TrendChart
+            metric={metric}
+            range={TimeRange.LastHour}
+            aggregate={AggregateFunction.Max}
+          />
+        </PollUpdatesContext.Provider>
+      </Provider>
+    )
+    const { rerender } = render(chart(null))
+    await screen.findByText('No data in this period.')
+
+    rerender(chart('2026-11-24T12:26:00Z'))
+
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2))
   })
 
   it('shows a message when there is no data in the period', async () => {

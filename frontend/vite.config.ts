@@ -28,7 +28,14 @@ export default defineConfig(({ command, mode }) => {
       throw new Error('GRAPHQL_URL is required for the dev server')
     }
 
-    graphqlProxy = { '/graphql': createGraphQLProxy(env.GRAPHQL_URL) }
+    if (!env.NOTIFIER_URL) {
+      throw new Error('NOTIFIER_URL is required for the dev server')
+    }
+
+    graphqlProxy = {
+      '/graphql': createGraphQLProxy(env.GRAPHQL_URL),
+      '/hubs': { target: env.NOTIFIER_URL, changeOrigin: true, ws: true },
+    }
   }
 
   return {

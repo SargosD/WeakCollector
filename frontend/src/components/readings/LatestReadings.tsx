@@ -1,4 +1,5 @@
 import { AlertCircleIcon, InboxIcon } from 'lucide-react'
+import { useEffect, useMemo } from 'react'
 import { useQuery } from 'urql'
 import {
   Carousel,
@@ -8,14 +9,37 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel'
 import { Spinner } from '@/components/ui/spinner'
+import { usePollUpdates } from '@/live/pollUpdates'
 import { LatestReadingsDocument } from '@/types/graphql'
 import { LocationCard } from './LocationCard'
 import { groupReadingsByLocation } from './utils/groupReadings'
 
 export function LatestReadings() {
-  const [{ data, error, fetching }] = useQuery({ query: LatestReadingsDocument })
+  const [{ data, error, fetching }, reexecute] = useQuery({ query: LatestReadingsDocument })
+  const { lastPoll, resync } = usePollUpdates()
 
-  const readings = data?.latestMeterReadings ?? []
+  useEffect(() => {
+    if (resync > 0) {
+      reexecute({ requestPolicy: 'network-only' })
+    }
+  }, [resync, reexecute])
+
+  const pushed = useMemo(
+    () =>
+      lastPoll?.readings
+        .map((reading) => ({ ...reading, polledAt: lastPoll.polledAt }))
+        .sort((a, b) => a.location.localeCompare(b.location) || a.type.localeCompare(b.type)),
+    [lastPoll],
+  )
+
+  const queried = data?.latestMeterReadings ?? []
+  const pushedAt = lastPoll?.polledAt
+  const pushedIsNewer =
+    pushed !== undefined &&
+    pushedAt !== undefined &&
+    (queried.length === 0 || Date.parse(pushedAt) > Date.parse(queried[0].polledAt))
+  const readings = pushedIsNewer ? pushed : queried
+  const hasData = data !== undefined || pushedIsNewer
 
   return (
     <section aria-label="Latest values" className="flex min-h-64 items-center justify-center">
@@ -29,11 +53,11 @@ export function LatestReadings() {
         </div>
       )}
 
-      {!error && !data && fetching && (
+      {!error && !hasData && fetching && (
         <Spinner aria-label="Loading latest values" className="size-5 text-muted-foreground" />
       )}
 
-      {!error && data && readings.length === 0 && (
+      {!error && hasData && readings.length === 0 && (
         <div className="flex flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
           <InboxIcon aria-hidden="true" className="size-8" />
           <span>No readings yet.</span>
