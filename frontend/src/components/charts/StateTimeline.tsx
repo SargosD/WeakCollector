@@ -55,25 +55,27 @@ export function StateTimeline({ metric, range }: StateTimelineProps) {
 
   return (
     <figure aria-label={`${metric.label} timeline`} className="w-full space-y-2">
-      {rows.map(([location, states]) => (
-        <div key={location} className="flex items-center gap-3">
-          <span className="w-24 shrink-0 truncate text-xs text-muted-foreground">{location}</span>
-          <div className="flex h-6 flex-1 gap-px">
-            {slots.map((slot) => {
-              const state = states.get(slot)
-              const label = state === undefined ? 'No data' : state ? 'On' : 'Off'
+      <div className="flex h-72 flex-col gap-1">
+        {rows.map(([location, states]) => (
+          <div key={location} className="flex min-h-0 flex-1 items-center gap-3">
+            <span className="w-24 shrink-0 truncate text-xs text-muted-foreground">{location}</span>
+            <div className="flex h-full max-h-10 flex-1 gap-px">
+              {slots.map((slot) => {
+                const state = states.get(slot)
+                const label = state === undefined ? 'No data' : state ? 'True' : 'False'
 
-              return (
-                <div
-                  key={slot}
-                  title={`${location} · ${tooltipFormat.format(new Date(slot))} · ${label}`}
-                  className={`flex-1 rounded-[1px] ${state ? 'bg-sky-500' : state === false ? 'bg-muted' : ''}`}
-                />
-              )
-            })}
+                return (
+                  <div
+                    key={slot}
+                    title={`${location} · ${tooltipFormat.format(new Date(slot))} · ${label}`}
+                    className={`flex-1 rounded-[1px] ${state ? 'bg-sky-500' : state === false ? 'bg-muted' : ''}`}
+                  />
+                )
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       <div className="flex justify-between pl-27 text-xs text-muted-foreground">
         <span>{tickFormat.format(new Date(slots[0]))}</span>
@@ -83,11 +85,11 @@ export function StateTimeline({ metric, range }: StateTimelineProps) {
       <div className="flex gap-4 pl-27 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <span aria-hidden="true" className="size-2.5 rounded-[1px] bg-sky-500" />
-          On
+          True
         </span>
         <span className="flex items-center gap-1.5">
           <span aria-hidden="true" className="size-2.5 rounded-[1px] bg-muted" />
-          Off
+          False
         </span>
       </div>
     </figure>

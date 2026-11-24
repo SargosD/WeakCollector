@@ -21,6 +21,18 @@ query Metrics($range: TimeRange!) {
   }
 }
 
+query Aggregation(
+  $type: String!
+  $name: String!
+  $range: TimeRange!
+  $aggregate: AggregateFunction!
+) {
+  aggregation(type: $type, name: $name, range: $range, aggregate: $aggregate) {
+    location
+    value
+  }
+}
+
 query MeasurementTrend(
   $type: String!
   $name: String!

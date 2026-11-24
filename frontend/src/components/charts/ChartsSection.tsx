@@ -9,6 +9,7 @@ import {
   TimeRange,
 } from '@/types/graphql'
 import { AggregateSelect } from './AggregateSelect'
+import { AggregationChart } from './AggregationChart'
 import { MetricSelect } from './MetricSelect'
 import { RangeSelect } from './RangeSelect'
 import { StateTimeline } from './StateTimeline'
@@ -61,11 +62,20 @@ export function ChartsSection() {
                 <AggregateSelect value={aggregate} onChange={setAggregate} />
               )}
             </div>
-            {metric.valueType === MeasurementValueType.Number ? (
-              <TrendChart metric={metric} range={range} aggregate={aggregate} />
-            ) : (
-              <StateTimeline metric={metric} range={range} />
-            )}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="min-w-0 space-y-3">
+                <h3 className="text-sm font-semibold">Over time</h3>
+                {metric.valueType === MeasurementValueType.Number ? (
+                  <TrendChart metric={metric} range={range} aggregate={aggregate} />
+                ) : (
+                  <StateTimeline metric={metric} range={range} />
+                )}
+              </div>
+              <div className="min-w-0 space-y-3">
+                <h3 className="text-sm font-semibold">By location</h3>
+                <AggregationChart metric={metric} range={range} aggregate={aggregate} />
+              </div>
+            </div>
           </>
         )}
       </div>
