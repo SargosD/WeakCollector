@@ -13,6 +13,44 @@ query LatestReadings {
   }
 }
 
+query Readings(
+  $where: MeterReadingFilterInput
+  $order: [MeterReadingSortInput!]
+  $first: Int
+  $after: String
+  $last: Int
+  $before: String
+) {
+  allReadings(
+    where: $where
+    order: $order
+    first: $first
+    after: $after
+    last: $last
+    before: $before
+  ) {
+    totalCount
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    nodes {
+      id
+      location
+      polledAt
+      type
+      measurements {
+        id
+        name
+        value
+        valueType
+      }
+    }
+  }
+}
+
 query Metrics($range: TimeRange!) {
   metrics(range: $range) {
     type
