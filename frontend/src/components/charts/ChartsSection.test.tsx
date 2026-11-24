@@ -64,6 +64,26 @@ describe('ChartsSection', () => {
     expect(screen.queryByRole('group', { name: 'Aggregate function' })).not.toBeInTheDocument()
   })
 
+  it('requests whether an on/off metric was on in each slot', async () => {
+    mockResponse({
+      data: { metrics: [{ type: 'motion', name: 'motionDetected', valueType: 'BOOLEAN' }] },
+    })
+    renderSection()
+
+    await waitFor(() => {
+      const trendCall = vi
+        .mocked(fetch)
+        .mock.calls.map(([url]) => new URL(String(url), 'http://localhost'))
+        .find((url) => url.searchParams.get('operationName') === 'MeasurementTrend')
+
+      expect(JSON.parse(trendCall?.searchParams.get('variables') ?? '{}')).toMatchObject({
+        type: 'motion',
+        name: 'motionDetected',
+        aggregate: 'MAX',
+      })
+    })
+  })
+
   it('starts with the last 24 hours', async () => {
     mockResponse({ data: { metrics: [] } })
     renderSection()
