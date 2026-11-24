@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { Provider, cacheExchange, createClient, fetchExchange } from 'urql'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { InitialPollUpdates, PollUpdatesContext } from '@/live/pollUpdates'
 import { ReadingsTable } from './ReadingsTable'
 
 function reading(id: number, location: string) {
@@ -103,6 +104,35 @@ describe('ReadingsTable', () => {
 
     await waitFor(() => expect(lastVariables()).toMatchObject({ first: 20, after: 'end' }))
     expect(await screen.findByText('21–21 of 25')).toBeInTheDocument()
+  })
+
+  it('offers a way back to the newest readings instead of refetching a later page', async () => {
+    mockResponse(page([reading(1, 'Office')], 25, true))
+    const client = createClient({ url: '/graphql', exchanges: [cacheExchange, fetchExchange] })
+    const table = (polledAt: string | null) => (
+      <Provider value={client}>
+        <PollUpdatesContext.Provider
+          value={{
+            ...InitialPollUpdates,
+            lastPoll: polledAt ? { pollId: 'poll', polledAt, readings: [] } : null,
+          }}
+        >
+          <ReadingsTable />
+        </PollUpdatesContext.Provider>
+      </Provider>
+    )
+    const { rerender } = render(table(null))
+    fireEvent.click(await screen.findByRole('button', { name: 'Next' }))
+    await screen.findByText('21–21 of 25')
+    const callsOnPageTwo = vi.mocked(fetch).mock.calls.length
+
+    rerender(table('2026-11-24T12:27:00Z'))
+
+    fireEvent.click(await screen.findByRole('button', { name: 'New readings – back to top' }))
+    await waitFor(() => {
+      expect(vi.mocked(fetch).mock.calls.length).toBeGreaterThan(callsOnPageTwo)
+      expect(lastVariables()).not.toHaveProperty('after')
+    })
   })
 
   it('shows an error when the request fails', async () => {

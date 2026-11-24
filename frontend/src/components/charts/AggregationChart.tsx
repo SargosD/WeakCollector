@@ -4,6 +4,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { useQuery } from 'urql'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Spinner } from '@/components/ui/spinner'
+import { useRefetchOnPoll } from '@/live/pollUpdates'
 import {
   AggregateFunction,
   AggregationDocument,
@@ -20,7 +21,7 @@ type AggregationChartProps = {
 
 export function AggregationChart({ metric, range, aggregate }: AggregationChartProps) {
   const isOnOff = metric.valueType === MeasurementValueType.Boolean
-  const [{ data, error, fetching }] = useQuery({
+  const [{ data, error, fetching }, reexecute] = useQuery({
     query: AggregationDocument,
     variables: {
       type: metric.type,
@@ -29,6 +30,7 @@ export function AggregationChart({ metric, range, aggregate }: AggregationChartP
       aggregate: isOnOff ? AggregateFunction.Avg : aggregate,
     },
   })
+  useRefetchOnPoll(reexecute)
 
   const bars = useMemo(
     () =>

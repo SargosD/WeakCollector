@@ -6,7 +6,7 @@ COPY . .
 RUN npm run build
 
 FROM nginx:1.29-alpine AS final
-ENV NGINX_ENVSUBST_FILTER=GRAPHQL_URL
+ENV NGINX_ENVSUBST_FILTER=GRAPHQL_URL|NOTIFIER_URL
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80

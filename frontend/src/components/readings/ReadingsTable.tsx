@@ -4,6 +4,7 @@ import { useQuery } from 'urql'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
+import { usePollUpdates, useRefetchOnPoll } from '@/live/pollUpdates'
 import {
   Table,
   TableBody,
@@ -24,12 +25,13 @@ const TimeFormat = new Intl.DateTimeFormat(undefined, {
   minute: '2-digit',
 })
 
-type Page = { after?: string; before?: string; start: number }
+type Page = { after?: string; before?: string; start: number; seenPolledAt?: string | null }
 
 export function ReadingsTable() {
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [page, setPage] = useState<Page>({ start: 0 })
+  const lastPolledAt = usePollUpdates().lastPoll?.polledAt ?? null
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -40,7 +42,7 @@ export function ReadingsTable() {
     return () => clearTimeout(timeout)
   }, [search])
 
-  const [{ data, error, fetching }] = useQuery({
+  const [{ data, error, fetching }, reexecute] = useQuery({
     query: ReadingsDocument,
     variables: {
       where: debouncedSearch ? { location: { contains: debouncedSearch } } : undefined,
@@ -56,9 +58,12 @@ export function ReadingsTable() {
     },
   })
 
+  useRefetchOnPoll(reexecute, page.start === 0)
+
   const readings = data?.allReadings?.nodes ?? []
   const total = data?.allReadings?.totalCount ?? 0
   const pageInfo = data?.allReadings?.pageInfo
+  const hasNewerReadings = page.start > 0 && lastPolledAt !== page.seenPolledAt
 
   return (
     <section aria-labelledby="readings-heading" className="mt-10 space-y-4">
@@ -75,6 +80,12 @@ export function ReadingsTable() {
           className="sm:w-64"
         />
       </div>
+
+      {hasNewerReadings && (
+        <Button size="sm" variant="secondary" onClick={() => setPage({ start: 0 })}>
+          New readings – back to top
+        </Button>
+      )}
 
       {error && (
         <div role="alert" className="flex items-center gap-2 text-sm text-destructive">
@@ -135,6 +146,7 @@ export function ReadingsTable() {
                   setPage({
                     before: pageInfo?.startCursor ?? undefined,
                     start: Math.max(0, page.start - PageSize),
+                    seenPolledAt: page.seenPolledAt,
                   })
                 }
               >
@@ -145,7 +157,11 @@ export function ReadingsTable() {
                 variant="outline"
                 disabled={page.start + readings.length >= total}
                 onClick={() =>
-                  setPage({ after: pageInfo?.endCursor ?? undefined, start: page.start + PageSize })
+                  setPage({
+                    after: pageInfo?.endCursor ?? undefined,
+                    start: page.start + PageSize,
+                    seenPolledAt: page.start === 0 ? lastPolledAt : page.seenPolledAt,
+                  })
                 }
               >
                 Next

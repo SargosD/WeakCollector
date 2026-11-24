@@ -119,6 +119,11 @@ services:
     build:
       context: ./backend
       dockerfile: WeakCollector.Notifier/Dockerfile
+    environment:
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Port: 5672
+      RabbitMq__User: ${RABBITMQ_USER:-weakcollector}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:-weakcollector}
     ports:
       - "${NOTIFIER_PORT:-5001}:8080"
     depends_on:
@@ -132,6 +137,7 @@ services:
       context: ./frontend
     environment:
       GRAPHQL_URL: ${GRAPHQL_URL:?GRAPHQL_URL is required}
+      NOTIFIER_URL: ${NOTIFIER_URL:-http://notifier:8080}
     ports:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:

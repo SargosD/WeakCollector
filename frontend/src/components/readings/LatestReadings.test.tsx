@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { Provider, cacheExchange, createClient, fetchExchange } from 'urql'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { InitialPollUpdates, PollUpdatesContext } from '@/live/pollUpdates'
+import { MeasurementValueType } from '@/types/graphql'
 import { LatestReadings } from './LatestReadings'
 
 const readings = [
@@ -75,6 +77,45 @@ describe('LatestReadings', () => {
 
     expect(await screen.findByText('No readings yet.')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('shows pushed readings when they are newer than the loaded ones', async () => {
+    mockResponse({ data: { latestMeterReadings: readings } })
+    render(
+      <Provider
+        value={createClient({ url: '/graphql', exchanges: [cacheExchange, fetchExchange] })}
+      >
+        <PollUpdatesContext.Provider
+          value={{
+            ...InitialPollUpdates,
+            lastPoll: {
+              pollId: 'poll',
+              polledAt: '2026-11-20T12:01:00Z',
+              readings: [
+                {
+                  id: 4,
+                  location: 'Office',
+                  type: 'energy',
+                  measurements: [
+                    {
+                      id: 4,
+                      name: 'energy',
+                      value: '418.67',
+                      valueType: MeasurementValueType.Number,
+                    },
+                  ],
+                },
+              ],
+            },
+          }}
+        >
+          <LatestReadings />
+        </PollUpdatesContext.Provider>
+      </Provider>,
+    )
+
+    expect(await screen.findByRole('heading', { name: 'Office' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Kitchen' })).not.toBeInTheDocument()
   })
 
   it('shows an error when the request fails', async () => {
