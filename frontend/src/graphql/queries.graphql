@@ -5,7 +5,6 @@ query LatestReadings {
     polledAt
     type
     measurements {
-      id
       name
       value
       valueType
@@ -31,8 +30,6 @@ query Readings(
   ) {
     totalCount
     pageInfo {
-      hasNextPage
-      hasPreviousPage
       startCursor
       endCursor
     }
@@ -42,7 +39,6 @@ query Readings(
       polledAt
       type
       measurements {
-        id
         name
         value
         valueType

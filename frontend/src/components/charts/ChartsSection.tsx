@@ -1,33 +1,33 @@
-import { AlertCircleIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useQuery } from 'urql'
-import { Spinner } from '@/components/ui/spinner'
-import { useRefetchOnPoll } from '@/live/pollUpdates'
+import { QueryState } from '@/components/shared/QueryState'
+import { useRefetchOnPoll } from '@/realtime/hooks/useRefetchOnPoll'
 import {
   AggregateFunction,
   MeasurementValueType,
   MetricsDocument,
   TimeRange,
 } from '@/types/graphql'
-import { AggregateSelect } from './AggregateSelect'
-import { AggregationChart } from './AggregationChart'
-import { MetricSelect } from './MetricSelect'
-import { RangeSelect } from './RangeSelect'
-import { StateTimeline } from './StateTimeline'
-import { TrendChart } from './TrendChart'
-import { metricOptions } from './utils/metricOptions'
+import { AggregateSelect } from './controls/AggregateSelect'
+import { AggregationChart } from './views/AggregationChart'
+import { MetricSelect } from './controls/MetricSelect'
+import { RangeSelect } from './controls/RangeSelect'
+import { StateTimeline } from './views/StateTimeline'
+import { TrendChart } from './views/TrendChart'
+import { formatMetrics } from './utils/formatMetrics'
 
 export function ChartsSection() {
   const [range, setRange] = useState(TimeRange.LastDay)
   const [aggregate, setAggregate] = useState(AggregateFunction.Avg)
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
-  const [{ data, error, fetching }, reexecute] = useQuery({
+  const [result, reexecute] = useQuery({
     query: MetricsDocument,
     variables: { range },
   })
   useRefetchOnPoll(reexecute)
 
-  const metrics = useMemo(() => metricOptions(data?.metrics ?? []), [data])
+  const { data } = result
+  const metrics = useMemo(() => formatMetrics(data?.metrics ?? []), [data])
   const metric = metrics.find((item) => item.key === selectedKey) ?? metrics[0]
 
   return (
@@ -40,49 +40,44 @@ export function ChartsSection() {
       </div>
 
       <div className="min-h-24 space-y-4">
-        {error && (
-          <div role="alert" className="flex items-center gap-2 text-sm text-destructive">
-            <AlertCircleIcon aria-hidden="true" className="size-5" />
-            <span>Could not load metrics.</span>
-          </div>
-        )}
-
-        {!error && !data && fetching && (
-          <Spinner aria-label="Loading metrics" className="size-5 text-muted-foreground" />
-        )}
-
-        {!error && data && !metric && (
-          <p className="text-sm text-muted-foreground">No metrics in this period.</p>
-        )}
-
-        {!error && metric && (
-          <>
-            <div className="flex flex-wrap items-center gap-3">
-              <MetricSelect
-                metrics={metrics}
-                value={metric}
-                onChange={(selected) => setSelectedKey(selected.key)}
-              />
-              {metric.valueType === MeasurementValueType.Number && (
-                <AggregateSelect value={aggregate} onChange={setAggregate} />
-              )}
-            </div>
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div className="min-w-0 space-y-3">
-                <h3 className="text-sm font-semibold">Over time</h3>
-                {metric.valueType === MeasurementValueType.Number ? (
-                  <TrendChart metric={metric} range={range} aggregate={aggregate} />
-                ) : (
-                  <StateTimeline metric={metric} range={range} />
+        <QueryState
+          result={result}
+          isEmpty={!metric}
+          messages={{
+            error: 'Could not load metrics.',
+            loading: 'Loading metrics',
+            empty: 'No metrics in this period.',
+          }}
+        >
+          {metric && (
+            <>
+              <div className="flex flex-wrap items-center gap-3">
+                <MetricSelect
+                  metrics={metrics}
+                  value={metric}
+                  onChange={(selected) => setSelectedKey(selected.key)}
+                />
+                {metric.valueType === MeasurementValueType.Number && (
+                  <AggregateSelect value={aggregate} onChange={setAggregate} />
                 )}
               </div>
-              <div className="min-w-0 space-y-3">
-                <h3 className="text-sm font-semibold">By location</h3>
-                <AggregationChart metric={metric} range={range} aggregate={aggregate} />
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div className="min-w-0 space-y-3">
+                  <h3 className="text-sm font-semibold">Over time</h3>
+                  {metric.valueType === MeasurementValueType.Number ? (
+                    <TrendChart metric={metric} range={range} aggregate={aggregate} />
+                  ) : (
+                    <StateTimeline metric={metric} range={range} />
+                  )}
+                </div>
+                <div className="min-w-0 space-y-3">
+                  <h3 className="text-sm font-semibold">By location</h3>
+                  <AggregationChart metric={metric} range={range} aggregate={aggregate} />
+                </div>
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </QueryState>
       </div>
     </section>
   )

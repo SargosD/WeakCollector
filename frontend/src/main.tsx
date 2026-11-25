@@ -4,16 +4,16 @@ import { Provider as GraphQLProvider } from 'urql'
 import './index.css'
 import { App } from '@/App'
 import { createGraphQLClient } from '@/graphql/client'
-import { PollUpdatesProvider } from '@/live/PollUpdatesProvider'
+import { LastPollProvider } from '@/realtime/context/LastPollProvider'
 
 const client = createGraphQLClient()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <GraphQLProvider value={client}>
-      <PollUpdatesProvider>
+      <LastPollProvider>
         <App />
-      </PollUpdatesProvider>
+      </LastPollProvider>
     </GraphQLProvider>
   </StrictMode>,
 )

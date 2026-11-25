@@ -94,3 +94,7 @@ dotnet_diagnostic.CA1707.severity = none
 
 [**/Migrations/*.cs]
 generated_code = true
+
+[WeakCollector.Messaging/Messages/*.cs]
+# Message contracts keep their related records together in one file.
+dotnet_diagnostic.SA1402.severity = none

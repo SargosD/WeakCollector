@@ -16,5 +16,5 @@ internal static class SamplePolls
                 new Meter("energy", "Bedroom", Payload("""{"energy":819.12}""")),
             ]);
 
-    public static JsonElement Payload(string json) => JsonDocument.Parse(json).RootElement.Clone();
+    public static JsonElement Payload(string json) => JsonElement.Parse(json);
 }
