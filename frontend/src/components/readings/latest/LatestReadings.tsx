@@ -1,4 +1,3 @@
-import { useContext, useMemo } from 'react'
 import { useQuery } from 'urql'
 import {
   Carousel,
@@ -8,31 +7,14 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel'
 import { QueryState } from '@/components/shared/QueryState'
-import { LastPollContext } from '@/realtime/context/lastPollContext'
 import { LatestReadingsDocument } from '@/types/graphql'
+import { useLatestReadings } from './hooks/useLatestReadings'
 import { LocationCard } from './LocationCard'
 import { groupReadingsByLocation } from './utils/groupReadings'
 
 export function LatestReadings() {
   const [{ data, error, fetching }] = useQuery({ query: LatestReadingsDocument })
-  const lastPoll = useContext(LastPollContext)
-
-  const pushed = useMemo(
-    () =>
-      lastPoll?.readings
-        .map((reading) => ({ ...reading, polledAt: lastPoll.polledAt }))
-        .sort((a, b) => a.location.localeCompare(b.location) || a.type.localeCompare(b.type)),
-    [lastPoll],
-  )
-
-  const queried = data?.latestMeterReadings ?? []
-  const pushedAt = lastPoll?.polledAt
-  const pushedIsNewer =
-    pushed !== undefined &&
-    pushedAt !== undefined &&
-    (queried.length === 0 || Date.parse(pushedAt) > Date.parse(queried[0].polledAt))
-  const readings = pushedIsNewer ? pushed : queried
-  const hasData = data !== undefined || pushedIsNewer
+  const { readings, hasData } = useLatestReadings(data?.latestMeterReadings)
 
   return (
     <section aria-label="Latest values" className="flex min-h-64 items-center justify-center">

@@ -1,3 +1,4 @@
+using HotChocolate;
 using HotChocolate.Data;
 using WeakCollector.Data;
 using WeakCollector.GraphQL.Api.Models;
@@ -11,16 +12,16 @@ public sealed class Query
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<MeterReading> GetAllReadings(MeterReadingService meterReadings) =>
+    public IQueryable<MeterReading> GetAllReadings([Service] MeterReadingService meterReadings) =>
         meterReadings.GetAll();
 
     [UseProjection]
-    public IQueryable<MeterReading> GetLatestMeterReadings(MeterReadingService meterReadings) =>
+    public IQueryable<MeterReading> GetLatestMeterReadings([Service] MeterReadingService meterReadings) =>
         meterReadings.GetLatest();
 
     public Task<IReadOnlyList<MetricInfo>> GetMetrics(
         TimeRange range,
-        MeterReadingService meterReadings,
+        [Service] MeterReadingService meterReadings,
         CancellationToken cancellationToken) =>
         meterReadings.GetMetricsAsync(range, cancellationToken);
 
@@ -29,7 +30,7 @@ public sealed class Query
         string name,
         TimeRange range,
         AggregateFunction aggregate,
-        MeterReadingService meterReadings,
+        [Service] MeterReadingService meterReadings,
         CancellationToken cancellationToken) =>
         meterReadings.GetMeasurementTrendAsync(type, name, range, aggregate, cancellationToken);
 
@@ -38,7 +39,7 @@ public sealed class Query
         string name,
         TimeRange range,
         AggregateFunction aggregate,
-        MeterReadingService meterReadings,
+        [Service] MeterReadingService meterReadings,
         CancellationToken cancellationToken) =>
         meterReadings.GetAggregationAsync(type, name, range, aggregate, cancellationToken);
 }

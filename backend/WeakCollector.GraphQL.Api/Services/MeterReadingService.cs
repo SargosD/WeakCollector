@@ -46,35 +46,21 @@ public sealed class MeterReadingService(IDbContextFactory<WeakCollectorDbContext
         var bucketSeconds = bucket.TotalSeconds;
 
         var grouped = _db.Measurements
-            .AsNoTracking()
-            .Where(m => m.MeterReading.Type == type
-                && m.Name == name
-                && m.ValueType != MeasurementValueType.Text
-                && m.MeterReading.PolledAt >= from)
-            .GroupBy(
-                m => new
-                {
-                    m.MeterReading.Location,
-                    Bucket = Math.Floor((m.MeterReading.PolledAt - from).TotalSeconds / bucketSeconds),
-                },
-                m => m.ValueType == MeasurementValueType.Boolean
-                    ? (m.Value == "true" ? 1.0 : 0.0)
-                    : Convert.ToDouble(m.Value));
+            .ByTypeAndName(type, name, from)
+            .GroupByNumericValue(m => new
+            {
+                m.MeterReading.Location,
+                Bucket = Math.Floor((m.MeterReading.PolledAt - from).TotalSeconds / bucketSeconds),
+            });
 
-        var aggregated = aggregate switch
-        {
-            AggregateFunction.Min => grouped.Select(g => new { g.Key.Location, g.Key.Bucket, Value = g.Min() }),
-            AggregateFunction.Max => grouped.Select(g => new { g.Key.Location, g.Key.Bucket, Value = g.Max() }),
-            _ => grouped.Select(g => new { g.Key.Location, g.Key.Bucket, Value = g.Average() }),
-        };
-
-        var buckets = await aggregated
-            .OrderBy(b => b.Bucket)
-            .ThenBy(b => b.Location)
+        var buckets = await grouped
+            .OrderBy(g => g.Key.Bucket)
+            .ThenBy(g => g.Key.Location)
+            .AggregateValues(aggregate)
             .ToListAsync(cancellationToken);
 
         return buckets
-            .Select(b => new TrendPoint(b.Location, from.AddSeconds(b.Bucket * bucketSeconds), b.Value))
+            .Select(b => new TrendPoint(b.Key.Location, from.AddSeconds(b.Key.Bucket * bucketSeconds), b.Value))
             .ToList();
     }
 
@@ -88,30 +74,16 @@ public sealed class MeterReadingService(IDbContextFactory<WeakCollectorDbContext
         var (from, _) = range.Window();
 
         var grouped = _db.Measurements
-            .AsNoTracking()
-            .Where(m => m.MeterReading.Type == type
-                && m.Name == name
-                && m.ValueType != MeasurementValueType.Text
-                && m.MeterReading.PolledAt >= from)
-            .GroupBy(
-                m => m.MeterReading.Location,
-                m => m.ValueType == MeasurementValueType.Boolean
-                    ? (m.Value == "true" ? 1.0 : 0.0)
-                    : Convert.ToDouble(m.Value));
+            .ByTypeAndName(type, name, from)
+            .GroupByNumericValue(m => m.MeterReading.Location);
 
-        var aggregated = aggregate switch
-        {
-            AggregateFunction.Min => grouped.Select(g => new { Location = g.Key, Value = g.Min() }),
-            AggregateFunction.Max => grouped.Select(g => new { Location = g.Key, Value = g.Max() }),
-            _ => grouped.Select(g => new { Location = g.Key, Value = g.Average() }),
-        };
-
-        var locations = await aggregated
-            .OrderBy(a => a.Location)
+        var locations = await grouped
+            .OrderBy(g => g.Key)
+            .AggregateValues(aggregate)
             .ToListAsync(cancellationToken);
 
         return locations
-            .Select(a => new Aggregation(a.Location, a.Value))
+            .Select(a => new Aggregation(a.Key, a.Value))
             .ToList();
     }
 
